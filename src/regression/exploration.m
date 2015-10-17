@@ -1,5 +1,4 @@
 %% Load data
-load('HaNoi_classification.mat');
 load('HaNoi_regression.mat');
 
 % Normalize data
