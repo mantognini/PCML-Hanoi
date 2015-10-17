@@ -11,21 +11,26 @@ nbFig = ceil(size(X_train, 2) / plotPerFig);
 assert(nbDim < nbFig * plotPerFig);
 
 for figNo = 0:(nbFig - 1)
-    fig = figure;
+    figure('Name', ['raw data, ' num2str(figNo + 1) ' of ' num2str(nbFig)]);
 
     for subplotNo = 1:plotPerFig
         plotNo = figNo * plotPerFig + subplotNo;
         
         if plotNo <= nbDim
             subplot(plotDim(1), plotDim(2), subplotNo);
-            hold on;
 
             plot(X_train(:, plotNo), y_train, '.');
             title(['dim ' num2str(plotNo)]);
         end
     end
-    hold off;
 end
+
+figure('Name', 'histogram of data');
+hist(y_train, 100);
+xlabel('y');
+ylabel('occurrences');
+title('histogram of training data');
+
 
 % Display interesting plots
 groupA = [25, 62]; % Features with big impacts on output
