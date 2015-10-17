@@ -2,6 +2,10 @@
 load('HaNoi_classification.mat');
 load('HaNoi_regression.mat');
 
+% Normalize data
+X_trainN = normalize(X_train);
+X_testN  = normalize(X_test);
+
 % Display all plots
 nbDim = size(X_train, 2);
 plotDim = [4, 4];
@@ -19,8 +23,8 @@ for figNo = 0:(nbFig - 1)
         if plotNo <= nbDim
             subplot(plotDim(1), plotDim(2), subplotNo);
 
-            plot(X_train(:, plotNo), y_train, '.');
-            title(['dim ' num2str(plotNo)]);
+            plot(X_trainN(:, plotNo), y_train, '.');
+            title(['feature #' num2str(plotNo)]);
         end
     end
 end
