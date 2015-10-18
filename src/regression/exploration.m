@@ -185,3 +185,58 @@ for figNo = 0:(nbFig - 1)
         end
     end
 end
+
+%% Plot histogram of Discrete features only
+groupB     = [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61];
+groupBcats = [3,  3,  2,  2,  2,  3,  3,  4,  4,  3,  4,  3];
+
+figure('Name', 'Discrete feature histograms');
+
+for i = 1:length(groupB)
+    feature = groupB(i);
+    bins = groupBcats(i);
+    subplot(3, 4, i);
+    hist(X_train(:, feature), bins);
+    title([num2str(feature) 'th feature']);
+end
+
+%% Clustering using a categorical feature [No good]
+
+cat = 61; % one of groupB with three categories, but none produced good clustering
+X_cat = X_train(:, cat);
+K = 3;
+
+idx = kmeans(X_cat, K);
+
+figure;
+for k = 1:K
+    plot(X_cat(idx == k), y_train(idx == k), '.', 'MarkerSize', 15);
+    hold on;
+end
+
+% Plot all features with clustered data
+nbDim = size(X_train, 2);
+plotDim = [4, 4];
+plotPerFig = (plotDim(1) * plotDim(2));
+nbFig = ceil(size(X_train, 2) / plotPerFig);
+
+assert(nbDim < nbFig * plotPerFig);
+
+for figNo = 0:(nbFig - 1)
+    figure('Name', ['clustered raw data, ' num2str(figNo + 1) ' of ' num2str(nbFig)]);
+
+    for subplotNo = 1:plotPerFig
+        plotNo = figNo * plotPerFig + subplotNo;
+        
+        if plotNo <= nbDim
+            subplot(plotDim(1), plotDim(2), subplotNo);
+
+            for k = 1:K
+                plot(X_train(idx == k, plotNo), y_train(idx == k), '.');
+                hold on;
+            end
+            title(['feature #' num2str(plotNo)]);
+        end
+    end
+end
+
