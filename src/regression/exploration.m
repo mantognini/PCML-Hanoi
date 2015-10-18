@@ -1,4 +1,5 @@
 %% Load data
+clear all;
 load('HaNoi_regression.mat');
 
 % Normalize data
@@ -106,7 +107,7 @@ figure('Name', 'Feature 25-62');
 plot3(X_trainN25, X_trainN62, y_train, '.');
 grid on;
 
-%% 3-mean: identification of the three input sources
+%% 3-mean: identification of the three input sources [dirty code]
 
 X_trainN25 = X_trainN(:, 25);
 X_trainN62 = X_trainN(:, 62);
@@ -140,3 +141,47 @@ plot3(X_25k3, X_62k3, y_k3, 'b.', 'MarkerSize', 15);
 hold off;
 grid on;
 
+%% K-Means of features 25 & 62 & display of clustered data
+
+K = 3;
+X25 = X_train(:, 25);
+X62 = X_train(:, 62);
+X = [X25 X62];
+[idx, C] = kmeans(X, K, 'MaxIter', 1000);
+
+% 3D Plot of feature 25 & 62 with clustering
+figure('Name', [num2str(K) '-Means of feature 25 & 62']);
+for k = 1:K
+    plot3(X25(idx == k), X62(idx == k), y_train(idx == k), '.', 'MarkerSize', 15);
+    hold on;
+end
+xlabel('25th feature');
+ylabel('62th feature');
+zlabel('response');
+grid on;
+
+% Plot all features with clustered data
+nbDim = size(X_train, 2);
+plotDim = [4, 4];
+plotPerFig = (plotDim(1) * plotDim(2));
+nbFig = ceil(size(X_train, 2) / plotPerFig);
+
+assert(nbDim < nbFig * plotPerFig);
+
+for figNo = 0:(nbFig - 1)
+    figure('Name', ['clustered raw data, ' num2str(figNo + 1) ' of ' num2str(nbFig)]);
+
+    for subplotNo = 1:plotPerFig
+        plotNo = figNo * plotPerFig + subplotNo;
+        
+        if plotNo <= nbDim
+            subplot(plotDim(1), plotDim(2), subplotNo);
+
+            for k = 1:K
+                plot(X_train(idx == k, plotNo), y_train(idx == k), '.');
+                hold on;
+            end
+            title(['feature #' num2str(plotNo)]);
+        end
+    end
+end
