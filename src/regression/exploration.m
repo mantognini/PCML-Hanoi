@@ -6,6 +6,7 @@ load('HaNoi_regression.mat');
 X_trainN = normalize(X_train);
 X_testN  = normalize(X_test);
 
+
 %% Display all plots
 nbDim = size(X_train, 2);
 plotDim = [4, 4];
@@ -52,6 +53,7 @@ for figNo = 0:(nbFig - 1)
         end
     end
 end
+
 
 %% Summary: display only interesting plots
 
@@ -107,6 +109,7 @@ figure('Name', 'Feature 25-62');
 plot3(X_trainN25, X_trainN62, y_train, '.');
 grid on;
 
+
 %% 3-mean: identification of the three input sources [dirty code]
 
 X_trainN25 = X_trainN(:, 25);
@@ -141,13 +144,14 @@ plot3(X_25k3, X_62k3, y_k3, 'b.', 'MarkerSize', 15);
 hold off;
 grid on;
 
-%% K-Means of features 25 & 62 & display of clustered data
+
+%% K-Means of features 25 & 62
 
 K = 3;
 X25 = X_train(:, 25);
 X62 = X_train(:, 62);
 X = [X25 X62];
-[idx, C] = kmeans(X, K, 'MaxIter', 1000);
+[idx, C] = kmeans(X, K, 'MaxIter', 1000, 'Distance', 'cityblock');
 
 % 3D Plot of feature 25 & 62 with clustering
 figure('Name', [num2str(K) '-Means of feature 25 & 62']);
@@ -160,7 +164,108 @@ ylabel('62th feature');
 zlabel('response');
 grid on;
 
-% Plot all features with clustered data
+
+%% clusterdata
+
+K = 3;
+X25 = X_train(:, 25);
+X62 = X_train(:, 62);
+X = [X25 X62];
+idx = clusterdata(X, 'linkage', 'complete', 'distance', 'cityblock', 'maxclust', K);
+
+% 3D Plot of feature 25 & 62 with clustering
+figure('Name', [num2str(K) '-clusterdata of feature 25 & 62']);
+for k = 1:K
+    plot3(X25(idx == k), X62(idx == k), y_train(idx == k), '.', 'MarkerSize', 15);
+    hold on;
+end
+xlabel('25th feature');
+ylabel('62th feature');
+zlabel('response');
+grid on;
+
+
+%% fitgmdist
+
+K = 3;
+X25 = X_train(:, 25);
+X62 = X_train(:, 62);
+X = [X25 X62];
+GMModel = fitgmdist(X, K);
+idx = cluster(GMModel, X);
+
+% 3D Plot of feature 25 & 62 with clustering
+figure('Name', [num2str(K) '-fitgmdist of feature 25 & 62']);
+for k = 1:K
+    plot3(X25(idx == k), X62(idx == k), y_train(idx == k), '.', 'MarkerSize', 15);
+    hold on;
+end
+xlabel('25th feature');
+ylabel('62th feature');
+zlabel('response');
+grid on;
+
+
+%% Clustering by hand
+
+X25 = X_train(:, 25);
+X62 = X_train(:, 62);
+
+lim62 = 15.75;
+idx62 = X62 >= lim62;
+lim25 = 15.25;
+idx25 = X25 < lim25;
+idx = idx62 + (idx25 & idx62) + 1; % values are 1, 2 or 3
+K = 3;
+
+figure('Name', 'manual split of feature 25 & 62');
+for k = 1:K
+    plot3(X25(idx == k), X62(idx == k), y_train(idx == k), '.', 'MarkerSize', 15);
+    hold on;
+end
+xlabel('25th feature');
+ylabel('62th feature');
+zlabel('response');
+grid on;
+axis square;
+
+
+%% Clustering using response for validation of our manual splitting
+
+K = 3;
+X25 = X_train(:, 25);
+X62 = X_train(:, 62);
+X = [X25 X62 y_train];
+%idx_validation = kmeans(X, K, 'MaxIter', 1000, 'Distance', 'cityblock');
+%idx_validation = clusterdata(X, 'linkage', 'average', 'distance', 'cityblock', 'maxclust', K);
+idx_validation = cluster(fitgmdist(X, K), X); % this variante can achieve better results but can be unstable
+
+figure('Name', 'Clustering using response');
+for k = 1:K
+    plot3(X25(idx_validation == k), X62(idx_validation == k), y_train(idx_validation == k), '.', 'MarkerSize', 15);
+    hold on;
+end
+xlabel('25th feature');
+ylabel('62th feature');
+zlabel('response');
+grid on;
+
+% Results: (indexes might need to be swapped before comparing clustering)
+diffs = length(find(idx_validation ~= idx_man));
+for i = 1:3
+    for j = 1:3
+        idx_man = idx;
+        idx_man(idx == i) = j;
+        idx_man(idx == j) = i;
+        diffs_t = length(find(idx_validation ~= idx_man));
+        diffs = min(diffs, diffs_t);
+    end
+end
+fprintf(['diffs = ' num2str(diffs) '.\n']); % ~30-50
+
+
+%% Plot all features with clustered data
+
 nbDim = size(X_train, 2);
 plotDim = [4, 4];
 plotPerFig = (plotDim(1) * plotDim(2));
@@ -186,6 +291,7 @@ for figNo = 0:(nbFig - 1)
     end
 end
 
+
 %% Plot histogram of Discrete features only
 groupB     = [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61];
 groupBcats = [3,  3,  2,  2,  2,  3,  3,  4,  4,  3,  4,  3];
@@ -199,6 +305,7 @@ for i = 1:length(groupB)
     hist(X_train(:, feature), bins);
     title([num2str(feature) 'th feature']);
 end
+
 
 %% Clustering using a categorical feature [No good]
 
