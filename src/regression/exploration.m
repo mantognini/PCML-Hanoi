@@ -417,3 +417,85 @@ end
 % cleanup local variables
 clear k;
 clear K;
+
+%% Print train & test data in histogramm form using source splitting without outliers
+K = 3;
+nbDim = size(data.clean.test.X{1}, 2);
+plotDim = [4, 4];
+plotPerFig = plotDim(1) * plotDim(2);
+nbFig = ceil(nbDim / plotPerFig);
+
+for figNo = 0:(nbFig - 1)
+    figure('Name', ['clustered train data without outliers, ' num2str(figNo + 1) ' of ' num2str(nbFig)]);
+
+    for subplotNo = 1:plotPerFig
+        plotNo = figNo * plotPerFig + subplotNo;
+        
+        if plotNo <= nbDim
+            subplot(plotDim(1), plotDim(2), subplotNo);
+
+            for k = 1:K
+                X = data.clean.train.X{k};
+                y = data.clean.train.y{k};
+                feature = X(:, plotNo);
+                plot(feature, y, '.');
+                hold on;
+            end
+            title(['feature #' num2str(plotNo)]);
+        end
+    end
+end
+
+for figNo = 0:(nbFig - 1)
+    figure('Name', ['histogram of test data without outliers, ' num2str(figNo + 1) ' of ' num2str(nbFig)]);
+
+    for subplotNo = 1:plotPerFig
+        plotNo = figNo * plotPerFig + subplotNo;
+        
+        if plotNo <= nbDim
+            subplot(plotDim(1), plotDim(2), subplotNo);
+
+            for k = 1:K
+                X = data.clean.test.X{k};
+                feature = X(:, plotNo);
+                histogram(feature);
+                hold on;
+            end
+            title(['feature #' num2str(plotNo)]);
+        end
+    end
+end
+
+for figNo = 0:(nbFig - 1)
+    figure('Name', ['histogram of train data without outliers, ' num2str(figNo + 1) ' of ' num2str(nbFig)]);
+
+    for subplotNo = 1:plotPerFig
+        plotNo = figNo * plotPerFig + subplotNo;
+        
+        if plotNo <= nbDim
+            subplot(plotDim(1), plotDim(2), subplotNo);
+
+            for k = 1:K
+                X = data.clean.train.X{k};
+                feature = X(:, plotNo);
+                histogram(feature);
+                hold on;
+            end
+            title(['feature #' num2str(plotNo)]);
+        end
+    end
+end
+
+% Display histogram of response
+figure('Name', 'Histogram of response without outliers,');
+for k = 1:K
+    y = data.clean.train.y{k};
+    histogram(y);
+    hold on;
+end
+xlabel('y');
+ylabel('occurrences');
+title('histogram of training data without outliers');
+
+% cleanup local variables
+clear k K nbDim plotDim plotPerFig nbFig;
