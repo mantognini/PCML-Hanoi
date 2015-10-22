@@ -1,8 +1,8 @@
 function beta = logisticRegression(y,tX,alpha)
-% LOGISTICREGRESSION(y, tX, alpha)
+% logisticRegression(y,tX,alpha)
 %   Compute the logistic regression using Newton's method.
 %
-    % Newton method
+    % initialization
     [~, M] = size(tX);
     beta0 = zeros(M, 1); % aka beta0
     precision = 1^(-10);
