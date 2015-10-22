@@ -394,3 +394,26 @@ end
 % cleanup local variables
 clear k;
 clear K;
+
+%% plot clusters without outliers (manual split)
+K = 3;
+
+% ... 2D
+figure('Name', '2D clusters without outliers (manual split)');
+for k = 1:K
+    plot(data.clean.train.X{k}(:, 25), data.clean.train.X{k}(:, 62), ...
+        '.', 'MarkerSize', 15);
+    hold on;
+end
+
+% ... 3D
+figure('Name', '3D clusters without outliers (manual split)');
+for k = 1:K
+    plot3(data.clean.train.X{k}(:, 25), data.clean.train.X{k}(:, 62), ...
+        data.clean.train.y{k}, '.', 'MarkerSize', 15);
+    hold on;
+end
+
+% cleanup local variables
+clear k;
+clear K;
