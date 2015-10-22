@@ -383,21 +383,67 @@ K = 3;
 % We need to handle discrete features differently (or not at all?)
 groupB = [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61]; % Discrete features
 
+% Keep track of the number of outliers in `outliers(f, k)` for bar chart
+% and their index in `idx_outliers(k)`
+
+isInit = 0;
+
 for f = 1:D % For each feature
+    outliers(f, :) = [0 0 0];
     if all(~ismember(groupB, f))
         for k = 1:K
             X = data.train.Xnorm{k};
             feature = X(:, f);
-            idx = abs(feature) >= 3 * std(feature);
-            outs(k) = length(X(idx));
+            stddev(f, k) = std(feature);
+            idx = abs(feature) >= 3 * stddev(f, k); % 99.7%
+            outliers(f, k) = length(X(idx));
+            
+            % Combine outliers
+            if isInit
+                idx_outliers{k} = idx_outliers{k} | idx;
+            else
+                idx_outliers{k} = idx;
+            end
+        end
+        isInit = 1;
+    else
+        % Ignore discrete
+        outliers(f, :) = [-1/3 -1/3 -1/3]; % Dummy values for bar chart visualization
+    end
+end
+
+figure('Name', '# of outliers per features & input source');
+bar(outliers, 'stacked');
+xlabel('feature');
+ylabel('outliers');
+
+
+% Remove outliers
+for k = 1:K
+    data.train.Xnorm{k}(idx_outliers{k}) = [];
+    data.train.X{k}(idx_outliers{k}) = [];
+    data.train.y{k}(idx_outliers{k}) = [];
+end
+
+
+% Search again for outliers; don't recompute stddev this time!
+for f = 1:D % For each feature
+    outliers(f, :) = [0 0 0];
+    if all(~ismember(groupB, f))
+        for k = 1:K
+            X = data.train.Xnorm{k};
+            feature = X(:, f);
+            idx = abs(feature) >= 3 * stddev(f, k);
+            outliers(f, k) = length(X(idx));
         end
     else
         % Ignore discrete
-        outs = [-1/3 -1/3 -1/3]; % Dummy values for bar chart visualization
+        outliers(f, :) = [-1/3 -1/3 -1/3]; % Dummy values for bar chart visualization
     end
-    outliers(f, :) = outs;
 end
 
+% This time, we should get zeros for non-categorical features and -1 for
+% ther others.
 figure('Name', '# of outliers per features & input source');
 bar(outliers, 'stacked');
 xlabel('feature');
