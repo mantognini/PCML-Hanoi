@@ -286,13 +286,14 @@ for figNo = 0:(nbFig - 1)
 end
 
 
-%% Print train & test data in histogramm form using source splitting
+%% Reload (splitted/with/without_outliers) data using custom function
 
 clear all;
 data = loadRegressionData();
 
+%% Print train & test data in histogramm form using source splitting
 K = 3;
-nbDim = size(data.test.X{1}, 2);
+nbDim = size(data.dirty.test.X{1}, 2);
 plotDim = [4, 4];
 plotPerFig = plotDim(1) * plotDim(2);
 nbFig = ceil(nbDim / plotPerFig);
@@ -309,8 +310,8 @@ for figNo = 0:(nbFig - 1)
             subplot(plotDim(1), plotDim(2), subplotNo);
 
             for k = 1:K
-                X = data.train.X{k};
-                y = data.train.y{k};
+                X = data.dirty.train.X{k};
+                y = data.dirty.train.y{k};
                 feature = X(:, plotNo);
                 plot(feature, y, '.');
                 hold on;
@@ -330,7 +331,7 @@ for figNo = 0:(nbFig - 1)
             subplot(plotDim(1), plotDim(2), subplotNo);
 
             for k = 1:K
-                X = data.test.X{k};
+                X = data.dirty.test.X{k};
                 feature = X(:, plotNo);
                 histogram(feature);
                 hold on;
@@ -350,7 +351,7 @@ for figNo = 0:(nbFig - 1)
             subplot(plotDim(1), plotDim(2), subplotNo);
 
             for k = 1:K
-                X = data.train.X{k};
+                X = data.dirty.train.X{k};
                 feature = X(:, plotNo);
                 histogram(feature);
                 hold on;
@@ -363,7 +364,7 @@ end
 % Display histogram of response
 figure('Name', 'Histogram of response');
 for k = 1:K
-    y = data.train.y{k};
+    y = data.dirty.train.y{k};
     histogram(y);
     hold on;
 end
@@ -372,80 +373,24 @@ ylabel('occurrences');
 title('histogram of training data');
 
 
-%% Look for outliers
-
-clear all;
-data = loadRegressionData();
-
-D = size(data.test.X{1}, 2);
+%% sanity checks about outliers removal
 K = 3;
 
-% We need to handle discrete features differently (or not at all?)
-groupB = [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61]; % Discrete features
-
-% Keep track of the number of outliers in `outliers(f, k)` for bar chart
-% and their index in `idx_outliers(k)`
-
-isInit = 0;
-
-for f = 1:D % For each feature
-    outliers(f, :) = [0 0 0];
-    if all(~ismember(groupB, f))
-        for k = 1:K
-            X = data.train.Xnorm{k};
-            feature = X(:, f);
-            stddev(f, k) = std(feature);
-            idx = abs(feature) >= 3 * stddev(f, k); % 99.7%
-            outliers(f, k) = length(X(idx));
-            
-            % Combine outliers
-            if isInit
-                idx_outliers{k} = idx_outliers{k} | idx;
-            else
-                idx_outliers{k} = idx;
-            end
-        end
-        isInit = 1;
-    else
-        % Ignore discrete
-        outliers(f, :) = [-1/3 -1/3 -1/3]; % Dummy values for bar chart visualization
-    end
-end
-
-figure('Name', '# of outliers per features & input source');
-bar(outliers, 'stacked');
-xlabel('feature');
-ylabel('outliers');
-
-
-% Remove outliers
+% sanity checks
 for k = 1:K
-    data.train.Xnorm{k}(idx_outliers{k}) = [];
-    data.train.X{k}(idx_outliers{k}) = [];
-    data.train.y{k}(idx_outliers{k}) = [];
+    % Same number of features as dirty, but != #data points
+    assert(size(data.dirty.train.X{k}, 2) == size(data.clean.train.X{k}, 2));
+    assert(size(data.dirty.train.X{k}, 1) ~= size(data.clean.train.X{k}, 1));
+    assert(size(data.dirty.train.Xnorm{k}, 2) == size(data.clean.train.Xnorm{k}, 2));
+    assert(size(data.dirty.train.Xnorm{k}, 1) ~= size(data.clean.train.Xnorm{k}, 1));
+    assert(size(data.dirty.train.y{k}, 2) == size(data.clean.train.y{k}, 2));
+    assert(size(data.dirty.train.y{k}, 1) ~= size(data.clean.train.y{k}, 1));
+    
+    % Same number of data points between clean training data
+    assert(size(data.clean.train.y{k}, 1) == size(data.clean.train.X{k}, 1) && ...
+        size(data.clean.train.X{k}, 1) == size(data.clean.train.Xnorm{k}, 1));
 end
 
-
-% Search again for outliers; don't recompute stddev this time!
-for f = 1:D % For each feature
-    outliers(f, :) = [0 0 0];
-    if all(~ismember(groupB, f))
-        for k = 1:K
-            X = data.train.Xnorm{k};
-            feature = X(:, f);
-            idx = abs(feature) >= 3 * stddev(f, k);
-            outliers(f, k) = length(X(idx));
-        end
-    else
-        % Ignore discrete
-        outliers(f, :) = [-1/3 -1/3 -1/3]; % Dummy values for bar chart visualization
-    end
-end
-
-% This time, we should get zeros for non-categorical features and -1 for
-% ther others.
-figure('Name', '# of outliers per features & input source');
-bar(outliers, 'stacked');
-xlabel('feature');
-ylabel('outliers');
-
+% cleanup local variables
+clear k;
+clear K;
