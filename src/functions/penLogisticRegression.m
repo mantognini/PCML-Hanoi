@@ -1,6 +1,6 @@
-function beta = logisticRegression(y,tX,alpha)
-% logisticRegression(y,tX,alpha)
-%   Compute the logistic regression using Newton's method.
+function beta = penLogisticRegression(y,tX,alpha,lambda)
+% penLogisticRegression(y,tX,alpha,lambda)
+%   Compute the penalized logistic regression using Newton's method.
 %
     % initialization
     [~, M] = size(tX);
