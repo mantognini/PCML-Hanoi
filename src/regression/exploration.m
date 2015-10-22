@@ -226,9 +226,9 @@ K = 3;
 X25 = X_train(:, 25);
 X62 = X_train(:, 62);
 X = [X25 X62 y_train];
-%idx_validation = kmeans(X, K, 'MaxIter', 1000, 'Distance', 'cityblock');
+idx_validation = kmeans(X, K, 'MaxIter', 1000, 'Distance', 'cityblock');
 %idx_validation = clusterdata(X, 'linkage', 'average', 'distance', 'cityblock', 'maxclust', K);
-idx_validation = cluster(fitgmdist(X, K), X); % this variante can achieve better results but can be unstable
+%idx_validation = cluster(fitgmdist(X, K), X); % this variante can achieve better results but can be unstable
 
 figure('Name', 'Clustering using response');
 for k = 1:K
@@ -239,16 +239,20 @@ xlabel('25th feature');
 ylabel('62th feature');
 zlabel('response');
 grid on;
+axis square;
 
 % Results: (indexes might need to be swapped before comparing clustering)
-diffs = length(find(idx_validation ~= idx_man));
+diffs = length(find(idx_validation ~= idx));
 for i = 1:3
     for j = 1:3
-        idx_man = idx;
-        idx_man(idx == i) = j;
-        idx_man(idx == j) = i;
-        diffs_t = length(find(idx_validation ~= idx_man));
-        diffs = min(diffs, diffs_t);
+        for k = 1:3
+            idx_man = idx;
+            idx_man(idx == i) = k;
+            idx_man(idx == j) = i;
+            idx_man(idx == k) = j;
+            diffs_t = length(find(idx_validation ~= idx_man));
+            diffs = min(diffs, diffs_t);
+        end
     end
 end
 fprintf(['diffs = ' num2str(diffs) '.\n']); % ~30-50
