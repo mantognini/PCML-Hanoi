@@ -59,7 +59,7 @@ function [ data ] = loadRegressionData()
     D = size(data.dirty.test.X{1}, 2);
     K = 3;
 
-    % Filter out outliers
+    % Filter out outliers deduced by features analysis
     isInit = 0;
     for f = 1:D % For each feature
         if all(~ismember(groupB, f))
@@ -78,6 +78,15 @@ function [ data ] = loadRegressionData()
             end
             isInit = 1;
         end
+    end
+    
+    % Filter out outliers deduced by output analysis
+    for k = 1:K
+        y = normalize(data.dirty.train.y{k});
+        idx = abs(y) >= 3 * std(y); % 99.7%
+
+        % Combine outliers indices
+        idx_outliers{k} = idx_outliers{k} | idx;
     end
 
     % Remove outliers
