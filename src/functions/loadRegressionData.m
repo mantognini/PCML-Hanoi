@@ -3,12 +3,14 @@ function [ data ] = loadRegressionData()
 %
 % The returned data is presented as a structure with the following
 % interesting fields inside
-%   - dirty.
+%   - orginial
 %       - train.X
 %       - train.y
 %       - train.Xnorm
 %       - test.X
 %       - test.Xnorm
+%   - dirty.
+%       - same as above, but train data is splitted in 3 groups
 %   - clean.
 %       - same as above, but with the outliers removed
 % which all have three cells named 1, 2 and 3 that correspond to the three
@@ -19,6 +21,14 @@ function [ data ] = loadRegressionData()
     % Load data from file
     load('HaNoi_regression.mat');
     
+    % Save original data
+    data.original.train.X = X_train;
+    data.original.train.y = y_train;
+    data.original.train.Xnorm = normalize(X_train);
+    data.original.test.X = X_test;
+    data.original.test.Xnorm = normalize(X_test);
+    
+    % todo: use manualSplit function?
     % Apply manual splitting of the identified three input sources
     X25_train = X_train(:, 25);
     X62_train = X_train(:, 62);
