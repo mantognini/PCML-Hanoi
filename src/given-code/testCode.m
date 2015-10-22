@@ -51,7 +51,8 @@ disp('logistic regression...');
 alpha = 1e-3;
 tBeta = logisticRegression(y,tX,alpha);
 tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
-assert(sum(tY ~= y) / size(y,1) < 0.2);
+errorRatio = sum(tY ~= y) / size(y,1);
+assert(errorRatio < 0.2);
 disp('OK!');
 
 %%
@@ -62,7 +63,8 @@ alpha = 1e-3;
 lambda = 1e-2;
 tBeta = penLogisticRegression(y,tX,alpha,lambda);
 tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
-assert(sum(tY ~= y) / size(y,1) < 0.2);
+errorRatio = sum(tY ~= y) / size(y,1);
+assert(errorRatio < 0.2);
 disp('OK!');
 
 %%
