@@ -1,5 +1,5 @@
-function yValidPred = clusterGradientDescent(XTr, yTr, XValid)
-% clusterGradientDescent(XTr, yTr, XValid)
+function yValidPred = clusterGD(XTr, yTr, XValid)
+% clusterGD(XTr, yTr, XValid)
 %   Classify input in three sources and predict output
 %   by using the gradient descent method on the training data.
 %
