@@ -6,9 +6,8 @@ allData = loadRegressionData();
 
 % initialization
 % Methods not plotted:
-% @clusterLeastSquares
-methods = {@constantMethod, @meanMethod, @clusterMeansMethod, ...
-    @clusterGradientDescent}; % 
+% @clusterLeastSquares, @clusterGD, @constantMethod, @meanMethod
+methods = {@clusterMeansMethod, @clusterGDLS};
 seeds = 10;
 prop = 0.7;
 
