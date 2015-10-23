@@ -1,5 +1,5 @@
-function yValidPred = naiveConstant(XTr, yTr, XValid)
-% naiveConstant(XTr, yTr, XValid)
+function yValidPred = constantMethod(XTr, yTr, XValid)
+% constantMethod(XTr, yTr, XValid)
 %   Predict the same constant for each data point.
 %
     c = 4000; % by visual inspection

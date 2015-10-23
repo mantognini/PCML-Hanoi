@@ -1,5 +1,5 @@
-function yValidPred = naiveClusterMeans(XTr, yTr, XValid)
-% naiveClusterMeans(XTr, yTr, XValid)
+function yValidPred = clusterMeansMethod(XTr, yTr, XValid)
+% clusterMeansMethod(XTr, yTr, XValid)
 %   Classify input in three sources and predict mean of sources output.
 %
 
