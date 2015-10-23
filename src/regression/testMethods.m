@@ -10,8 +10,8 @@ methods = {
     %@medianMethod,
     %@meanMethod,
     %@clusterMediansMethod,
-    @clusterMeansMethod,
-    %@clusterGD,
+    %@clusterMeansMethod,
+    @clusterGD,
     @clusterGDLS
     %@clusterLeastSquares,
 };
