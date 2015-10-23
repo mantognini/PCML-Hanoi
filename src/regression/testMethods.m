@@ -12,7 +12,9 @@ methods = {
     %@clusterMediansMethod,
     %@clusterMeansMethod,
     @clusterGD,
-    @clusterGDLS
+    @clusterGDGroupA,
+    @clusterGDLS,
+    @clusterGDLSGroupA,
     %@clusterLeastSquares,
 };
 
