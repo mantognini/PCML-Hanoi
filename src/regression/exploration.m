@@ -418,7 +418,7 @@ end
 clear k;
 clear K;
 
-%% Print train & test data in histogramm form using source splitting without outliers
+%% Print train & test data in histogram form using source splitting without outliers
 K = 3;
 nbDim = size(data.clean.test.X{1}, 2);
 plotDim = [4, 4];
