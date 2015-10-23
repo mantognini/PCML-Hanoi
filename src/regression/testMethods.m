@@ -5,7 +5,7 @@ clear all;
 allData = loadRegressionData();
 
 % initialization
-methods = {@naiveConstant};
+methods = {@naiveConstant, @naiveMean};
 seeds = 10;
 prop = 0.7;
 
@@ -37,4 +37,4 @@ end
 % Plot methods
 fig = figure();
 
-boxplot(rmse);
+boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
