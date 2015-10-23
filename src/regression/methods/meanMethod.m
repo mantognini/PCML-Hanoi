@@ -1,5 +1,5 @@
-function yValidPred = naiveMeanMethod(XTr, yTr, XValid)
-% naiveMeanMethod(XTr, yTr, XValid)
+function yValidPred = meanMethod(XTr, yTr, XValid)
+% meanMethod(XTr, yTr, XValid)
 %   Predict the mean of training outputs.
 %
     meanY = mean(yTr);

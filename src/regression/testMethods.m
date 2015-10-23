@@ -5,7 +5,7 @@ clear all;
 allData = loadRegressionData();
 
 % initialization
-methods = {@constantMethod, @naiveMeanMethod};
+methods = {@constantMethod, @meanMethod};
 seeds = 10;
 prop = 0.7;
 
