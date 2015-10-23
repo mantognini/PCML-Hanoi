@@ -7,7 +7,8 @@ function [X] = normalize(X)
     meanX = repmat(meanX, size(X, 1), 1); % replicate row vector
     X = X - meanX;
     stdX = std(X); % row vector of std of column of X
-    stdX = repmat(stdX, size(X, 1), 1); % replicate row vector
-    X = X ./ stdX;
-    
+    if stdX ~= 0
+        stdX = repmat(stdX, size(X, 1), 1); % replicate row vector
+        X = X ./ stdX;
+    end
 end
