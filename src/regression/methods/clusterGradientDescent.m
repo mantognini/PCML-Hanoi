@@ -13,10 +13,10 @@ function yValidPred = clusterGradientDescent(XTr, yTr, XValid)
     beta = zeros(D + 1, K); % beta from least squares for each cluster
     for k = 1:K
         % .. for current cluster
-        X = XTr(splitTr.idx{k}, :);
+        X = normalize(XTr(splitTr.idx{k}, :));
         tX = [ones(size(X, 1), 1) X];
         y = yTr(splitTr.idx{k}, :);
-        beta(:, k) = leastSquaresGD(y, tX, 0.1);
+        beta(:, k) = leastSquaresGD(y, tX, 0.05);
     end
 
     % predict outputs for validation set

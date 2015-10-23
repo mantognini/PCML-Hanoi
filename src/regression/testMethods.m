@@ -6,11 +6,11 @@ allData = loadRegressionData();
 
 % initialization
 % Methods not plotted:
-% @constantMethod, @meanMethod, @clusterLeastSquares @clusterMeansMethod
-methods = {...
+% @clusterLeastSquares
+methods = {@constantMethod, @meanMethod, @clusterMeansMethod, ...
     @clusterGradientDescent}; % 
-seeds = 2;
-prop = 0.95;
+seeds = 10;
+prop = 0.7;
 
 N = size(allData.original.train.X, 1);
 
