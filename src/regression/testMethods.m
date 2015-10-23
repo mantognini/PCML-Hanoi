@@ -5,8 +5,9 @@ clear all;
 allData = loadRegressionData();
 
 % initialization
-methods = {@constantMethod, @meanMethod, @clusterMeansMethod};
-seeds = 10;
+methods = {@constantMethod, @meanMethod, @clusterMeansMethod, ...
+    @clusterLeastSquares};
+seeds = 2;
 prop = 0.7;
 
 N = size(allData.original.train.X, 1);
