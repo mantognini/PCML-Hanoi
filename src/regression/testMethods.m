@@ -5,12 +5,19 @@ clear all;
 allData = loadRegressionData();
 
 % initialization
-% Methods not plotted:
-% @clusterLeastSquares
-methods = {@constantMethod, @meanMethod, @clusterMeansMethod, ...
-    @clusterGradientDescent}; % 
-seeds = 10;
-prop = 0.7;
+methods = {
+    @constantMethod,
+    @medianMethod,
+    @meanMethod,
+    @clusterMediansMethod,
+    @clusterMeansMethod,
+    %@clusterGradientDescent,
+    %@clusterLeastSquares,
+};
+
+seeds = 20;
+
+splitRatio = 0.7;
 
 N = size(allData.original.train.X, 1);
 
@@ -23,7 +30,7 @@ for seed = 1:seeds
     X = allData.original.train.X(idx, :);
     y = allData.original.train.y(idx);
     
-    [XTr, yTr, XValid, yValid] = doSplit(y, X, prop);
+    [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
     
     % Test each method
     for methodNo = 1:numel(methods)
@@ -41,3 +48,4 @@ end
 fig = figure();
 
 boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
+
