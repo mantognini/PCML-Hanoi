@@ -141,6 +141,7 @@ for splitterNo = 1:numel(strategies)
         figure('Name', ['RMSE for ' func2str(splitter) ' + ' ...
             func2str(featureTransformation) ' + ' func2str(filter)]);
         boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
+        set(gca, 'FontSize', 10, 'XTickLabelRotation', 90);
         title([num2str(k) 'th cluster']);
         %xlabel('methods');
         ylabel('RMSE');
