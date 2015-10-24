@@ -93,3 +93,24 @@ for i = 1:length(keyContinuousFeatures);
     plotFeatureResponse(f, X_train, y_train);
 end
 
+
+%% Look at feature 1 & 11
+clear all;
+data = loadClassificationData();
+
+f1  = data.train.X(:, 1);
+f11 = data.train.X(:, 11);
+
+y = data.train.y;
+idx = y == 1;
+
+figure('Name', 'Histograms of features 1 & 11 with response');
+histogram2(f1(idx), f11(idx));
+hold on;
+histogram2(f1(~idx), f11(~idx));
+
+legend('1', '0', 'Location', 'northeast');
+
+xlabel('1st');
+ylabel('11th');
+zlabel('count');
