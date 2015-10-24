@@ -10,9 +10,9 @@ seeds = 10;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 % Data splitting methods
-splitters = {
-    @noClusterSplitter,
-    @manualClusterSplitter,
+strategies = {
+    { @noClusterSplitter,     @noFilter },
+    { @manualClusterSplitter, @noFilter },
 };
 
 % Model methods
@@ -26,8 +26,9 @@ methods = {
 % Compute & plot RMSE for each data splitting & model strategies
 
 % For each splitting strategy
-for splitterNo = 1:numel(splitters)
-    splitter = splitters{splitterNo};
+for splitterNo = 1:numel(strategies)
+    splitter = strategies{splitterNo}{1};
+    filter   = strategies{splitterNo}{2};
     
     [K, clusters] = splitter(data);
     
@@ -51,6 +52,9 @@ for splitterNo = 1:numel(splitters)
             
             [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
             
+            % Remove (or not) outliers
+            [XTr, yTr] = filter(XTr, yTr);
+            
             % Test each method
             for methodNo = 1:numel(methods)
                 method = methods{methodNo};
@@ -65,10 +69,10 @@ for splitterNo = 1:numel(splitters)
         end % seeds
         
         % Plot RMSE for this cluster
-        figure('Name', ['RMSE for ' func2str(splitter) ' and cluster ' num2str(k)]);
+        figure('Name', ['RMSE for ' func2str(splitter) ' + ' func2str(filter)]);
         boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
         title([num2str(k) 'th cluster']);
-        xlabel('methods');
+        %xlabel('methods');
         ylabel('RMSE');
         
     end % clusters
