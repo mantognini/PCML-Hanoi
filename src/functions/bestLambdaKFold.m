@@ -10,6 +10,11 @@ function lambda = bestLambdaKFold(y, tX, K)
     N = size(y, 1);
     idx = randperm(N);
     Nk = floor(N / K);
+    D = size(tX, 2) - 1;
+    
+    N_train = Nk * (K - 1);
+    assert(N_train >= D, ['Problem N_train < D: N_train = ' num2str(N_train) ', D = ' num2str(D)]);
+    
     for k = 1:K
         idxCV(k,:) = idx(1+(k-1)*Nk:k*Nk);
     end
