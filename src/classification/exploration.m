@@ -109,30 +109,29 @@ strategies = {
         @noFeatureTransformation,
         @noFilter,
         % method for the unique cluster
-        {
-            @constantMethod,
-        }
+        {{
+            @dummyClassificationMethod,
+        }}
     },
 };
 
-assert(false, 'TODO we want classification here, not regression');
+fprintf('TODO we want classification here, not regression\n');
 
-% Compute & plot RMSE for each data splitting & model strategies
+% Compute & plot misclassification for strategies
 
-% For each splitting strategy
 for splitterNo = 1:numel(strategies)
     splitter = strategies{splitterNo}{1};
     featureTransformation = strategies{splitterNo}{2};
-    filter   = strategies{splitterNo}{3};
-    methods  = strategies{splitterNo}{4};
+    filter = strategies{splitterNo}{3};
     
     [K, clusters] = splitter(data);
     
     % Test all methods on each clusters
     for k = 1:K
+        methods = strategies{splitterNo}{4}{k};
         cluster = featureTransformation(clusters{k});
         
-        rmse = zeros(seeds, numel(methods));
+        error = zeros(seeds, numel(methods));
         
         N = size(cluster.train.X, 1);
     
@@ -159,18 +158,18 @@ for splitterNo = 1:numel(strategies)
                 yValidPred = method(XTr, yTr, XValid);
                 
                 % Compute error
-                rmse(seed, methodNo) = computeRmse(yValidPred - yValid);
+                error(seed, methodNo) = length(find(yValidPred ~= yValid));
             end % methods
 
         end % seeds
         
         % Plot RMSE for this cluster
-        figure('Name', ['RMSE for ' func2str(splitter) ' + ' ...
+        figure('Name', ['Misclassification for ' func2str(splitter) ' + ' ...
             func2str(featureTransformation) ' + ' func2str(filter)]);
-        boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
+        boxplot(error, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
         title([num2str(k) 'th cluster']);
         %xlabel('methods');
-        ylabel('RMSE');
+        ylabel('misclassification');
         
     end % clusters
     
