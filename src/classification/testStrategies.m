@@ -15,11 +15,10 @@ strategies = {
         % method for the unique cluster
         {{
             @dummyClassificationMethod,
+            @naiveClassificationMethod,
         }}
     },
 };
-
-fprintf('TODO we want classification here, not regression\n');
 
 % Compute & plot misclassification for strategies
 
