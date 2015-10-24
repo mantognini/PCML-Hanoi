@@ -16,6 +16,7 @@ strategies = {
         {{
             @dummyClassificationMethod,
             @naiveClassificationMethod,
+            @logisticClassificationMethod,
         }}
     },
 };
