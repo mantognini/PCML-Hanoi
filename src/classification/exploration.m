@@ -114,3 +114,37 @@ legend('1', '0', 'Location', 'northeast');
 xlabel('1st');
 ylabel('11th');
 zlabel('count');
+
+
+%% Plot categories (not really useful actually)
+
+clear all;
+data = loadClassificationData();
+
+% Split data into training and validation sets
+N = length(data.train.y);
+idx = randperm(N);
+X = data.train.X(idx, :);
+y = data.train.y(idx);
+
+splitRatio = 0.7;
+[XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
+
+y = naiveClassificationMethod(XTr, yTr, XValid);
+X = data.train.X(:, [11, 7]); % two random features for 2D display
+
+correctIdx = find(y == yValid);
+correct0Idx = find(y(correctIdx) == 0);
+correct1Idx = find(y(correctIdx) == 1);
+incorrectIdx = find(y ~= yValid);
+
+assert(~isempty(correct0Idx), 'at least one 0 correctly classified');
+assert(~isempty(correct1Idx), 'at least one 1 correctly classified');
+assert(~isempty(incorrectIdx), 'at least one point misclassified');
+
+figure();
+plot(X(correct0Idx, 1), X(correct0Idx, 2), 'bo', ...
+     X(correct1Idx, 1), X(correct1Idx, 2), 'ro', ...
+     X(incorrectIdx, 1), X(incorrectIdx, 2), 'go');
+legend('0', '1', 'inkorect');
+
