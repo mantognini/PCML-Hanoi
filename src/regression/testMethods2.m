@@ -101,71 +101,83 @@ strategies = {
         @noFilter,
         % method for the 1st cluster
         {
-            @constantMethod,
+            %@constantMethod,
             %@medianMethod,
             @meanMethod,
             @GDLSMethod,
-            @ridgeLinear5Fold,
+            %@ridgeLinear5Fold,
             %@ridgeLinear10Fold,
             %@ridgeLinear20Fold,
+            @ridgeSqrt10Fold,
+            @ridgeLinear10Fold,
+            @ridgeSquare10Fold,
+            @ridgeCubic10Fold,
         }
         % method for the 2nd cluster
         {
-            @constantMethod,
+            %@constantMethod,
             %@medianMethod,
             @meanMethod,
             @GDLSMethod,
-            @ridgeLinear5Fold,
+            %@ridgeLinear5Fold,
             %@ridgeLinear10Fold,
             %@ridgeLinear20Fold,
+            @ridgeSqrt10Fold,
+            @ridgeLinear10Fold,
+            @ridgeSquare10Fold,
+            @ridgeCubic10Fold,
         }
         % method for the 3rd cluster
         {
-            @constantMethod,
+            %@constantMethod,
             %@medianMethod,
             @meanMethod,
             @GDLSMethod,
-            @ridgeLinear5Fold,
+            %@ridgeLinear5Fold,
             %@ridgeLinear10Fold,
             %@ridgeLinear20Fold,
+            @ridgeSqrt10Fold,
+            @ridgeLinear10Fold,
+            @ridgeSquare10Fold,
+            @ridgeCubic10Fold,
         }
     },
     
-    {
-        @manualClusterSplitter,
-        @removeDiscreteFeaturesTransformation,
-        @outliersFilter,
-        % method for the 1st cluster
-        {
-            @constantMethod,
-            %@medianMethod,
-            @meanMethod,
-            @GDLSMethod,
-            @ridgeLinear5Fold,
-            %@ridgeLinear10Fold,
-            %@ridgeLinear20Fold,
-        }
-        % method for the 2nd cluster
-        {
-            @constantMethod,
-            %@medianMethod,
-            @meanMethod,
-            @GDLSMethod,
-            @ridgeLinear5Fold,
-            %@ridgeLinear10Fold,
-            %@ridgeLinear20Fold,
-        }
-        % method for the 3rd cluster
-        {
-            @constantMethod,
-            %@medianMethod,
-            @meanMethod,
-            @GDLSMethod,
-            @ridgeLinear5Fold,
-            %@ridgeLinear10Fold,
-            %@ridgeLinear20Fold,
-        }
-    },
+%     {
+%         @manualClusterSplitter,
+%         @removeDiscreteFeaturesTransformation,
+%         @outliersFilter,
+%         % method for the 1st cluster
+%         {
+%             @constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%         % method for the 2nd cluster
+%         {
+%             @constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%         % method for the 3rd cluster
+%         {
+%             @constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%     },
 
     % keepFeature25And62Transformation doesn't improve things
 %     {
