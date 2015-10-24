@@ -9,8 +9,8 @@ function split = manualSplit(X)
         
     % Split indices
     % Indexes range over 1, 2 and 3
-    idx62 = X(:, 25) >= lim62;
-    idx25 = X(:, 62) < lim25;
+    idx62 = X(:, 62) >= lim62;
+    idx25 = X(:, 25) < lim25;
     idx = idx62 + (idx25 & idx62) + 1;
     
     % split the data
