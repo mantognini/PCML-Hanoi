@@ -15,11 +15,13 @@ strategies = {
         @noFilter,
         % method for the unique cluster
         {
-            @constantMethod,
-            @medianMethod,
-            @meanMethod,
+            %@constantMethod,
+            %@medianMethod,
+            %@meanMethod,
             @GDLSMethod,
+            @ridgeLinear5Fold,
             @ridgeLinear10Fold,
+            @ridgeLinear20Fold,
         }
     },
     {
@@ -28,26 +30,32 @@ strategies = {
         % method for the 1st cluster
         {
             %@constantMethod,
-            @medianMethod,
+            %@medianMethod,
             @meanMethod,
             @GDLSMethod,
+            @ridgeLinear5Fold,
             @ridgeLinear10Fold,
+            @ridgeLinear20Fold,
         }
         % method for the 2nd cluster
         {
             %@constantMethod,
-            @medianMethod,
+            %@medianMethod,
             @meanMethod,
             @GDLSMethod,
+            @ridgeLinear5Fold,
             @ridgeLinear10Fold,
+            @ridgeLinear20Fold,
         }
         % method for the 3rd cluster
         {
             @constantMethod,
-            @medianMethod,
+            %@medianMethod,
             @meanMethod,
             @GDLSMethod,
+            @ridgeLinear5Fold,
             @ridgeLinear10Fold,
+            @ridgeLinear20Fold,
         }
     },
 };
