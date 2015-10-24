@@ -499,3 +499,40 @@ title('histogram of training data without outliers');
 
 % cleanup local variables
 clear k K nbDim plotDim plotPerFig nbFig;
+
+
+%% Plot each feature/response per cluster
+clear all;
+
+% Load dataset
+allData = loadRegressionData();
+data = allData.original;
+[K, clusters] = manualClusterSplitter(data);
+
+side = 3;
+
+for k = 1:K
+    cluster = clusters{k};
+    D = size(cluster.train.X, 2);
+    
+    for f = 1:D
+        if (mod(f - 1, side * side) == 0)
+            figure('Name', ['Cluster ' num2str(k)]);
+        end
+        
+        subplot(side, side, mod(f - 1, side * side) + 1);
+        
+        x = cluster.train.X(:, f);
+        y = cluster.train.y;
+        
+        plot(x, y, '.');
+        xlabel([num2str(f) 'th feature']);
+        ylabel('response');
+    end
+end
+
+% Non flat features/response plot:
+% cluster 1 => 4, 16, 53
+% cluster 2 => 14, 18, 20, 43?, 59
+% cluster 3 => 5, 11, 33, 46
+
