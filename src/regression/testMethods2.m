@@ -9,18 +9,47 @@ data = allData.original;
 seeds = 10;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
-% Data splitting methods
 strategies = {
-    { @noClusterSplitter,     @noFilter },
-    { @manualClusterSplitter, @noFilter },
-};
-
-% Model methods
-methods = {
-    @constantMethod,
-    @medianMethod,
-    @meanMethod,
-    @GDLSMethod,
+    {
+        @noClusterSplitter,
+        @noFilter,
+        % method for the unique cluster
+        {
+            @constantMethod,
+            @medianMethod,
+            @meanMethod,
+            @GDLSMethod,
+            @ridgeLinear10Fold,
+        }
+    },
+    {
+        @manualClusterSplitter,
+        @noFilter,
+        % method for the 1st cluster
+        {
+            %@constantMethod,
+            @medianMethod,
+            @meanMethod,
+            @GDLSMethod,
+            @ridgeLinear10Fold,
+        }
+        % method for the 2nd cluster
+        {
+            %@constantMethod,
+            @medianMethod,
+            @meanMethod,
+            @GDLSMethod,
+            @ridgeLinear10Fold,
+        }
+        % method for the 3rd cluster
+        {
+            @constantMethod,
+            @medianMethod,
+            @meanMethod,
+            @GDLSMethod,
+            @ridgeLinear10Fold,
+        }
+    },
 };
 
 % Compute & plot RMSE for each data splitting & model strategies
@@ -29,6 +58,7 @@ methods = {
 for splitterNo = 1:numel(strategies)
     splitter = strategies{splitterNo}{1};
     filter   = strategies{splitterNo}{2};
+    methods  = strategies{splitterNo}{3};
     
     [K, clusters] = splitter(data);
     
