@@ -12,6 +12,7 @@ splitRatio = 0.7;   % training-validation ratio per cluster
 strategies = {
     {
         @noClusterSplitter,
+        @noFeatureTransformation,
         @noFilter,
         % method for the unique cluster
         {
@@ -20,12 +21,13 @@ strategies = {
             %@meanMethod,
             @GDLSMethod,
             @ridgeLinear5Fold,
-            @ridgeLinear10Fold,
-            @ridgeLinear20Fold,
+            %@ridgeLinear10Fold,
+            %@ridgeLinear20Fold,
         }
     },
     {
         @manualClusterSplitter,
+        @noFeatureTransformation,
         @noFilter,
         % method for the 1st cluster
         {
@@ -34,8 +36,8 @@ strategies = {
             @meanMethod,
             @GDLSMethod,
             @ridgeLinear5Fold,
-            @ridgeLinear10Fold,
-            @ridgeLinear20Fold,
+            %@ridgeLinear10Fold,
+            %@ridgeLinear20Fold,
         }
         % method for the 2nd cluster
         {
@@ -44,8 +46,8 @@ strategies = {
             @meanMethod,
             @GDLSMethod,
             @ridgeLinear5Fold,
-            @ridgeLinear10Fold,
-            @ridgeLinear20Fold,
+            %@ridgeLinear10Fold,
+            %@ridgeLinear20Fold,
         }
         % method for the 3rd cluster
         {
@@ -54,8 +56,8 @@ strategies = {
             @meanMethod,
             @GDLSMethod,
             @ridgeLinear5Fold,
-            @ridgeLinear10Fold,
-            @ridgeLinear20Fold,
+            %@ridgeLinear10Fold,
+            %@ridgeLinear20Fold,
         }
     },
 };
@@ -65,14 +67,15 @@ strategies = {
 % For each splitting strategy
 for splitterNo = 1:numel(strategies)
     splitter = strategies{splitterNo}{1};
-    filter   = strategies{splitterNo}{2};
-    methods  = strategies{splitterNo}{3};
+    featureTransformation = strategies{splitterNo}{2};
+    filter   = strategies{splitterNo}{3};
+    methods  = strategies{splitterNo}{4};
     
     [K, clusters] = splitter(data);
     
     % Test all methods on each clusters
     for k = 1:K
-        cluster = clusters{k};
+        cluster = featureTransformation(clusters{k});
         
         rmse = zeros(seeds, numel(methods));
         
@@ -107,7 +110,8 @@ for splitterNo = 1:numel(strategies)
         end % seeds
         
         % Plot RMSE for this cluster
-        figure('Name', ['RMSE for ' func2str(splitter) ' + ' func2str(filter)]);
+        figure('Name', ['RMSE for ' func2str(splitter) ' + ' ...
+            func2str(featureTransformation) ' + ' func2str(filter)]);
         boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
         title([num2str(k) 'th cluster']);
         %xlabel('methods');
