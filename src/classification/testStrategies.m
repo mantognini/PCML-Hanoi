@@ -4,7 +4,7 @@ clear all;
 data = loadClassificationData();
 
 % Settings
-seeds = 10;         % number of seed to be tested
+seeds = 20;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 strategies = {
@@ -61,7 +61,8 @@ for splitterNo = 1:numel(strategies)
                 yValidPred = method(XTr, yTr, XValid);
                 
                 % Compute error
-                error(seed, methodNo) = length(find(yValidPred ~= yValid));
+                mismatch = length(find(yValidPred ~= yValid));
+                error(seed, methodNo) = mismatch / length(yValidPred);
             end % methods
 
         end % seeds
