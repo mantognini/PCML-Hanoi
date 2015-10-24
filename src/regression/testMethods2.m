@@ -10,21 +10,37 @@ seeds = 10;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 strategies = {
-    {
-        @noClusterSplitter,
-        @noFeatureTransformation,
-        @noFilter,
-        % method for the unique cluster
-        {
-            %@constantMethod,
-            %@medianMethod,
-            %@meanMethod,
-            @GDLSMethod,
-            @ridgeLinear5Fold,
-            %@ridgeLinear10Fold,
-            %@ridgeLinear20Fold,
-        }
-    },
+%     {
+%         @noClusterSplitter,
+%         @noFeatureTransformation,
+%         @noFilter,
+%         % method for the unique cluster
+%         {
+%             %@constantMethod,
+%             %@medianMethod,
+%             %@meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%     },
+%     {
+%         @noClusterSplitter,
+%         @removeDiscreteFeaturesTransformation,
+%         @noFilter,
+%         % method for the unique cluster
+%         {
+%             %@constantMethod,
+%             %@medianMethod,
+%             %@meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%     },
+
     {
         @manualClusterSplitter,
         @noFeatureTransformation,
@@ -60,6 +76,80 @@ strategies = {
             %@ridgeLinear20Fold,
         }
     },
+    
+    % removeDiscreteFeaturesTransformation doesn't improve things
+%     {
+%         @manualClusterSplitter,
+%         @removeDiscreteFeaturesTransformation,
+%         @noFilter,
+%         % method for the 1st cluster
+%         {
+%             %@constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%         % method for the 2nd cluster
+%         {
+%             %@constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%         % method for the 3rd cluster
+%         {
+%             @constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%     },
+
+    % keepFeature25And62Transformation doesn't improve things
+%     {
+%         @manualClusterSplitter,
+%         @keepFeature25And62Transformation,
+%         @noFilter,
+%         % method for the 1st cluster
+%         {
+%             %@constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%         % method for the 2nd cluster
+%         {
+%             %@constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%         % method for the 3rd cluster
+%         {
+%             @constantMethod,
+%             %@medianMethod,
+%             @meanMethod,
+%             @GDLSMethod,
+%             @ridgeLinear5Fold,
+%             %@ridgeLinear10Fold,
+%             %@ridgeLinear20Fold,
+%         }
+%     },
 };
 
 % Compute & plot RMSE for each data splitting & model strategies
