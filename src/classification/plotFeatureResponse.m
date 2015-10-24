@@ -8,13 +8,14 @@ function plotFeatureResponse(feature, X_train, y_train)
     data_train = X_train(:, feature);
     
     h = histogram2(data_train, y_train);
-    h.Normalization = 'probability';
+    %h.Normalization = 'probability';
     
     legend('train', 'Location', 'northeast');
     
     xlabel('input');
     ylabel('response');
-    zlabel('probability');
+    zlabel('count');
+    %zlabel('probability');
     %zlim([0 1]);
     
     title([num2str(feature) 'th feature']);
