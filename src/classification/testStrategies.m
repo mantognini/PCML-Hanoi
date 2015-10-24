@@ -17,6 +17,7 @@ strategies = {
             @dummyClassificationMethod,
             @naiveClassificationMethod,
             @logisticClassificationMethod,
+            @logisticClassificationWithManualSplittingMethod,
         }}
     },
 };
