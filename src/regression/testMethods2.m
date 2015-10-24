@@ -10,78 +10,84 @@ seeds = 10;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 strategies = {
-%     {
-%         @noClusterSplitter,
-%         @noFeatureTransformation,
-%         @noFilter,
-%         %@outliersFilter,
-%         % method for the unique cluster
-%         {{
-%             @constantMethod,
-%             @medianMethod,
-%             @meanMethod,
-%             @GDLSMethod,
-%             @ridgeLinear5Fold,
-%             %@ridgeLinear10Fold,
-%             %@ridgeLinear20Fold,
-%         }}
-%     },
-
     {
-        @manualClusterSplitter,
+        @noClusterSplitter,
         @noFeatureTransformation,
-        @outliersFilter,
-        % method for the 1st cluster
-        {
-            {
-                %@constantMethod,
-                %@medianMethod,
-                @meanMethod,
-                @GDLSMethod,
-%                 @ridgeLinear5Fold,
-                @ridgeLinear10Fold,
-%                 @ridgeLinear20Fold,
-                @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
-                @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
-            }
-            % method for the 2nd cluster
-            {
-                %@constantMethod,
-                %@medianMethod,
-                @meanMethod,
-                @GDLSMethod,
-%                 @ridgeLinear5Fold,
-                @ridgeLinear10Fold,
-%                 @ridgeLinear20Fold,
-                @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
-                @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
-            }
-            % method for the 3rd cluster
-            {
-                %@constantMethod,
-                %@medianMethod,
-                @meanMethod,
-                @GDLSMethod,
-%                 @ridgeLinear5Fold,
-                @ridgeLinear10Fold,
-%                 @ridgeLinear20Fold,
-                @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
-%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
-                @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
-            }
-       }
+        @noFilter,
+        %@outliersFilter,
+        % method for the unique cluster
+        {{
+            @constantMethod,
+            %@medianMethod,
+            @meanMethod,
+            @GDLSMethod,
+%           @ridgeLinear5Fold,
+            @ridgeLinear10Fold,
+%           @ridgeLinear20Fold,
+            @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
+%           @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
+%           @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
+%           @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
+%           @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
+            @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
+        }}
     },
+
+%     {
+%         @manualClusterSplitter,
+%         @noFeatureTransformation,
+%         @outliersFilter,
+%         % method for the 1st cluster
+%         {
+%             {
+%                 %@constantMethod,
+%                 %@medianMethod,
+%                 @meanMethod,
+%                 @GDLSMethod,
+% %                 @ridgeLinear5Fold,
+%                 @ridgeLinear10Fold,
+% %                 @ridgeLinear20Fold,
+%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
+%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
+%             }
+%             % method for the 2nd cluster
+%             {
+%                 %@constantMethod,
+%                 %@medianMethod,
+%                 @meanMethod,
+%                 @GDLSMethod,
+% %                 @ridgeLinear5Fold,
+%                 @ridgeLinear10Fold,
+% %                 @ridgeLinear20Fold,
+%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
+%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
+%             }
+%             % method for the 3rd cluster
+%             {
+%                 %@constantMethod,
+%                 %@medianMethod,
+%                 @meanMethod,
+%                 @GDLSMethod,
+% %                 @ridgeLinear5Fold,
+%                 @ridgeLinear10Fold,
+% %                 @ridgeLinear20Fold,
+%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold12(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold051(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFoldSin1(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold13(10, XTr, yTr, XValid),
+% %                 @(XTr, yTr, XValid) ridgeEmplifiedKFold23(10, XTr, yTr, XValid),
+%                 @(XTr, yTr, XValid) ridgeEmplifiedKFold123(20, XTr, yTr, XValid),
+%             }
+%        }
+%     },
 };
 
 % Compute & plot RMSE for each data splitting & model strategies
