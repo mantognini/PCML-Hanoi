@@ -15,6 +15,6 @@ function yValidPred = predictRidgeKFold(XTr, yTr, XValid, K, phi, d)
     beta = ridgeRegression(yTr,tXTr, lambda);
     
     NValid = size(XValid, 1);
-    tXValid = [ones(NValid, 1) XValid];
+    tXValid = [ones(NValid, 1) phi(XValid, d)];
     yValidPred = tXValid*beta;
 end
