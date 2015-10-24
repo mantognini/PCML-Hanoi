@@ -10,8 +10,8 @@ function xPhied = emplifyFeatures(X, ~)
     % Decide look of X
     degrees = [1 2 3];
     features{1} = continuousFeaturesIdx;
-    features{2} = spottedFeaturesIdx;
-    features{3} = spottedFeaturesIdx;
+    features{2} = continuousFeaturesIdx; %spottedFeaturesIdx;
+    features{3} = continuousFeaturesIdx; %spottedFeaturesIdx;
     
     % Build X
     xPhied = [];

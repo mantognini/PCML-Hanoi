@@ -17,7 +17,7 @@ function [X, y] = outliersFilter(X, y)
         if ~isDiscrete
             sigma = std(feature);
             mu = mean(feature);
-            idx = abs(feature - mu) >= 4 * sigma; % 99.7%
+            idx = abs(feature - mu) >= 4 * sigma;
 
             % Combine outliers indices
             if isInit
@@ -32,7 +32,7 @@ function [X, y] = outliersFilter(X, y)
     % Filter out outliers deduced by output analysis
     sigma = std(y);
     mu = mean(y);
-    idx = abs(y - mu) >= 4 * sigma; % 99.7%
+    idx = abs(y - mu) >= 4 * sigma;
 
     % Combine outliers indices
     idx_outliers = idx_outliers | idx;
