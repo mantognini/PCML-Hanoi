@@ -1,17 +1,15 @@
 function xPhied = emplifyFeatures123(X, ~)
     D = size(X, 2);
-    assert(D == 67); % no features should have been removed
     
     % Special features
-    discreteFeaturesIdx = [9 11 15 22 27 30 38 40 44 47 56 61];
-    spottedFeaturesIdx = [53 16 4 59 43 20 14 18 46 33 1 5];
-    continuousFeaturesIdx = setdiff(1:D, discreteFeaturesIdx);
+    allIdx = 1:D;
+    discreteFeaturesIdx = getDiscreteFeaturesIdx(X, 5);
     
     % Decide look of X
     degrees = [1 2 3];
-    features{1} = continuousFeaturesIdx;
-    features{2} = continuousFeaturesIdx;
-    features{3} = continuousFeaturesIdx;
+    features{1} = allIdx(~discreteFeaturesIdx);
+    features{2} = allIdx(~discreteFeaturesIdx);
+    features{3} = allIdx(~discreteFeaturesIdx);
     
     % Build X
     xPhied = [];
