@@ -20,6 +20,7 @@ methods = {
     @constantMethod,
     @medianMethod,
     @meanMethod,
+    @GDLSMethod,
 };
 
 % Compute & plot RMSE for each data splitting & model strategies
