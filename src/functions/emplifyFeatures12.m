@@ -1,4 +1,4 @@
-function xPhied = emplifyFeatures(X, ~)
+function xPhied = emplifyFeatures12(X, ~)
     D = size(X, 2);
     assert(D == 67); % no features should have been removed
     
@@ -8,10 +8,9 @@ function xPhied = emplifyFeatures(X, ~)
     continuousFeaturesIdx = setdiff(1:D, discreteFeaturesIdx);
     
     % Decide look of X
-    degrees = [1 2 3];
+    degrees = [1 2];
     features{1} = continuousFeaturesIdx;
-    features{2} = continuousFeaturesIdx; %spottedFeaturesIdx;
-    features{3} = continuousFeaturesIdx; %spottedFeaturesIdx;
+    features{2} = continuousFeaturesIdx;
     
     % Build X
     xPhied = [];
