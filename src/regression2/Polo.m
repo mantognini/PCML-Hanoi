@@ -24,14 +24,30 @@ classdef Polo
         end
         
         function yValid = basisFunctionsMethod(polo, XTr, yTr, XValid)
-            D = size(XTr, 2);
+            % Normalise XTr & XValid using XTr mean and variance
+            mu = mean(XTr);
             
-            power = @(i, x) x .^ i;
+            muV = repmat(mu, size(XTr, 1), 1);
+            XTr = XTr - muV;
+            
+            muV = repmat(mu, size(XValid, 1), 1);
+            XValid = XValid - muV;
+            
+            sigma = std(XTr);
+            if sigma ~= 0
+                sigmaV = repmat(sigma, size(XTr, 1), 1);
+                XTr = XTr ./ sigmaV;
+                
+                sigmaV = repmat(sigma, size(XValid, 1), 1);
+                XValid = XValid ./ sigmaV;
+            end
             
             % Build basis functions
+            power = @(i, x) x .^ i;
             p = 1;
             phis{p} = @(x) 1;
             
+            D = size(XTr, 2);
             for d = 1:D
                 p = p + 1;
                 phis{p} = @(x) power(1, x(d));
@@ -44,7 +60,7 @@ classdef Polo
             end
         
             tXTrPhi = polo.map(phis, XTr);
-            %beta = leastSquaresGDLS(yTr, XTrPhi);
+            %beta = leastSquaresGDLS(yTr, tXTrPhi); % not good with unnormilized values
             lambda = bestLambdaKFold(yTr, tXTrPhi, 10);
             beta = ridgeRegression(yTr, tXTrPhi, lambda);
             
@@ -104,7 +120,7 @@ classdef Polo
             y = data.train.y;
             sigma = std(y);
             mu = mean(y);
-            idx = abs(y - mu) >= 3 * sigma;
+            idx = abs(y - mu) >= 2 * sigma;
             
             fprintf(['Removed ' num2str(length(find(idx))) ' outliers.\n']);
 
