@@ -92,6 +92,8 @@ strategies = {
 
 % Compute & plot RMSE for each data splitting & model strategies
 
+fprintf('I am starting\n');
+
 % For each splitting strategy
 for splitterNo = 1:numel(strategies)
     splitter = strategies{splitterNo}{1};
@@ -102,6 +104,7 @@ for splitterNo = 1:numel(strategies)
     
     % Test all methods on each clusters
     for k = 1:K
+        fprintf(['processing cluster ' num2str(k) ' of ' num2str(K) '\n']);
         methods  = strategies{splitterNo}{4}{k};
         
         if (numel(methods) == 0)
@@ -118,6 +121,7 @@ for splitterNo = 1:numel(strategies)
         % Test each methods several times with different training and 
         % validation split of the data
         for seed = 1:seeds
+            fprintf(['\tprocessing seed ' num2str(seed) ' of ' num2str(seeds) '\n']);
             setSeed(seed);
             
             % Split data into training and validation sets
@@ -132,6 +136,7 @@ for splitterNo = 1:numel(strategies)
             
             % Test each method
             for methodNo = 1:numel(methods)
+                fprintf(['\t\tprocessing method ' num2str(methodNo) ' of ' num2str(numel(methods)) '\n']);
                 method = methods{methodNo};
                 
                 % Collect predictions
@@ -146,8 +151,8 @@ for splitterNo = 1:numel(strategies)
         % Plot RMSE for this cluster
         figure('Name', ['RMSE for ' func2str(splitter) ' + ' ...
             func2str(featureTransformation) ' + ' func2str(filter)]);
-        boxplot(rmse, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
-        set(gca, 'FontSize', 10, 'XTickLabelRotation', 90);
+        boxplot(rmse);%, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
+        %set(gca, 'FontSize', 10, 'XTickLabelRotation', 90);
         title([num2str(k) 'th cluster']);
         %xlabel('methods');
         ylabel('RMSE');
