@@ -44,19 +44,19 @@ classdef Polo
             
             % Build basis functions
             power = @(i, x) x .^ i;
+            sigma = @(x) 1 / (1 + exp(-x));
             p = 1;
             phis{p} = @(x) 1;
             
             D = size(XTr, 2);
             for d = 1:D
-                p = p + 1;
-                phis{p} = @(x) power(1, x(d));
-                p = p + 1;
-                phis{p} = @(x) power(2, x(d));
-                p = p + 1;
-                phis{p} = @(x) power(3, x(d));
-                p = p + 1;
-                phis{p} = @(x) tanh(x(d));
+                p = p + 1; phis{p} = @(x) power(1, x(d));
+                %p = p + 1; phis{p} = @(x) power(0.5, x(d)); % might imply complex numbers
+                p = p + 1; phis{p} = @(x) power(2, x(d));
+                p = p + 1; phis{p} = @(x) power(3, x(d));
+                %p = p + 1; phis{p} = @(x) power(4, x(d));
+                %p = p + 1; phis{p} = @(x) tanh(x(d));
+                %p = p + 1; phis{p} = @(x) sigma(x(d));
             end
         
             tXTrPhi = polo.map(phis, XTr);
