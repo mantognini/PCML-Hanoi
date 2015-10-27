@@ -50,5 +50,17 @@ function lambda = bestLambdaKFold(y, tX, K)
     % Best lambda
     [minMeanTe, lambdaIdStars] = min(mseTe(:));
     lambda = lambdas(lambdaIdStars);
+
 end
 
+%% Put break point after line 52 and run the following to plot curves
+function print()
+    figure('Name', 'bestLambdaKFold');
+    semilogx(lambdas, mseTr, 'r-o', lambdas, mseTe, 'b-x');
+    hold on;
+    legend('Training', 'Testing', 'Location', 'southeast');
+    semilogx(lambda, minMeanTe, 'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
+    xlabel('lambda');
+    ylabel('RMSE');
+    hold off;
+end
