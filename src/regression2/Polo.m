@@ -116,13 +116,13 @@ classdef Polo
         end
         
         
-        function data = deleteYOutliers(~, data)
+        function [dels, data] = deleteYOutliers(~, data)
             y = data.train.y;
             sigma = std(y);
             mu = mean(y);
             idx = abs(y - mu) >= 2 * sigma;
             
-            fprintf(['Removed ' num2str(length(find(idx))) ' outliers.\n']);
+            dels = length(find(idx));
 
             data.train.X(idx, :) = [];
             data.train.y(idx, :) = [];

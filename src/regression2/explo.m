@@ -4,6 +4,8 @@ polo = Polo();
 
 [K, clusters] = polo.clusterize();
 
+% CAREFUL WITH FEATURES: they are designed for basisFunctionsMethod only!
+
 % Found by removing one feature after the other manually on 1+x+x^2+x^3
 % model (x per feature) (37 features)
 features{1} = [ 4  6  7  10  11  12  13  14  16  19  21  22  24  26  28 ...
@@ -24,16 +26,16 @@ features{2} = setdiff(1:67, [... % all features minus the following:
 features{3} = [ 4 5 6 10 20 21 26 27 30 31 32 34 35 36 37 45 46 49 50 51 53 54 56 59 63 65 ];
 
 methods = {
-    %{ trim features, algo, name }
-    %{ false, @polo.constantMethod, 'constant' },
+   %{ trim features, algo, name }
+%     { false, @polo.constantMethod, 'constant' },
     { false, @medianMethod, 'median' },
     { false, @meanMethod, 'mean' },
     { false, @GDLSMethod, 'GD+LS' },
-    { true, @GDLSMethod, 'GD+LS + trim features' },
-    { true, @ridgeLinear10Fold, 'ridge linear + trim features' },
+%     { true, @GDLSMethod, 'GD+LS + trim features' },
     { false, @ridgeLinear10Fold, 'ridge linear' },
+%     { true, @ridgeLinear10Fold, 'ridge linear + trim features' },
     { true, @polo.basisFunctionsMethod, 'PHI + trim features' },
-    { false, @polo.basisFunctionsMethod, 'PHI' },
+    %{ false, @polo.basisFunctionsMethod, 'PHI' }, % doesn't work for 2nd cluster: bestLambdaKFold complains about dimentionality
 };
 methodNames = cellfun(@(mInfo) mInfo{3}, methods, 'UniformOutput', false);
 
@@ -46,9 +48,6 @@ fprintf('I am starting...\n');
 for k = 1:K
     fprintf(['processing cluster ' num2str(k) ' of ' num2str(K) '\n']);
     
-    cluster = clusters{k};
-    cluster = polo.deleteYOutliers(cluster);
-    
 %     polo.plotData(['Cluster ' num2str(k)], cluster);
 %     continue;
     
@@ -59,13 +58,17 @@ for k = 1:K
         mInfo = methods{methodNo};
         trim = mInfo{1};
         method = mInfo{2};
+        
+        cluster = clusters{k};
+        [dels, cluster] = polo.deleteYOutliers(cluster);
+        fprintf(['\t\tRemoved ' num2str(dels) ' outliers.\n']);
 
         if (trim)
-            fprintf(['\ttrimming features down to ' num2str(length(features{k})) '\n']);
+            fprintf(['\t\ttrimming features down to ' num2str(length(features{k})) '\n']);
             cluster = polo.trimFeatures(cluster, features{k});
         end
     
-        fprintf(['\t\tprocessing seed [' num2str(S) '] ']);
+        fprintf(['\t\tprocessing seeds [' num2str(S) '] ']);
         for seed = 1:S
             fprintf([num2str(seed) '  ']);
             setSeed(seed);
@@ -82,7 +85,9 @@ for k = 1:K
             yValidPred = method(XTr, yTr, XValid);
 
             % Compute error
-            rmse(k, seed, methodNo) = computeRmse(yValidPred - yValid);
+            e = computeRmse(yValidPred - yValid);
+            %fprintf(num2str(e));
+            rmse(k, seed, methodNo) = e;
         end
         
         fprintf('\n');
@@ -114,5 +119,104 @@ xlabel('methods');
 ylabel('RMSE');
 
 fprintf('I am finished now!\n');
+
+
+%% Find interesting features for k
+% - takes a *very* long time;
+% - set k manually
+% - change basis methods in polo.basisFunctionsMethod if needed
+% - sacrifice a goat or two
+% - if the cluster is too small, start by hand and reduce some features
+%   (e.g. the categorical ones), simplify the model in a first pass and
+%   then add more basis function and start again from the previous result.
+
+clear all;
+
+polo = Polo();
+
+S = 10;
+splitRatio = 0.7;
+k = 1;
+method = @polo.basisFunctionsMethod;
+
+[~, clusters] = polo.clusterize();
+
+fprintf('I am starting...\n');
+    
+cluster = clusters{k};
+[~, cluster] = polo.deleteYOutliers(cluster);
+
+% Baseline all features
+features = 1:67;
+fprintf(['Baseline: processing seed [' num2str(S) '] ']);
+for seed = 1:S
+    fprintf([num2str(seed) '  ']);
+    setSeed(seed);
+
+    % Split data into training and validation sets
+    N = size(cluster.train.X, 1);
+    idx = randperm(N);
+    X = cluster.train.X(idx, :);
+    y = cluster.train.y(idx);
+
+    [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
+
+    % Collect predictions
+    yValidPred = method(XTr, yTr, XValid);
+
+    % Compute error
+    rmse(seed) = computeRmse(yValidPred - yValid);
+end
+
+fprintf('\n');
+
+bestMedian = median(rmse);
+fprintf(['baseline: ' num2str(bestMedian) '\n']);
+        
+for suspect = 1:67
+    oldFs = features;
+    features = setdiff(features, suspect);
+
+    fprintf(['processing suspect ' num2str(suspect) '\n']);
+
+    cluster = polo.trimFeatures(cluster, features);
+    
+    fprintf(['\tprocessing seed [' num2str(S) '] ']);
+    for seed = 1:S
+        fprintf([num2str(seed) '  ']);
+        setSeed(seed);
+
+        % Split data into training and validation sets
+        N = size(cluster.train.X, 1);
+        idx = randperm(N);
+        X = cluster.train.X(idx, :);
+        y = cluster.train.y(idx);
+
+        [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
+
+        % Collect predictions
+        yValidPred = method(XTr, yTr, XValid);
+
+        % Compute error
+        rmse(seed) = computeRmse(yValidPred - yValid);
+    end
+
+    fprintf('\n');
+    
+    %boxplot(rmse);
+    
+    med = median(rmse);
+    fprintf(['current median: ' num2str(med) '\n']);
+    if (med < bestMedian)
+        fprintf(['better! -> removing ' num2str(suspect) 'th feature\n']);
+        bestMedian = med;
+    else
+        fprintf(['worse! -> keeping ' num2str(suspect) 'th feature\n']);
+        features = oldFs;
+    end
+end
+
+fprintf('I am finished now!\n');
+fprintf(['for k = ' num2str(k) ' we have these important features:\n' num2str(features) '\n']);
 
 
