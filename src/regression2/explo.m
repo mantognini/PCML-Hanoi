@@ -53,7 +53,7 @@ for k = 1:K
     
     % Test each methods several times with different training and 
     % validation split of the data
-    for methodNo = 1:numel(methods)
+    for methodNo = 1:M
         fprintf(['\tprocessing method ' num2str(methodNo) ' of ' num2str(numel(methods)) '\n']);
         mInfo = methods{methodNo};
         trim = mInfo{1};
@@ -84,10 +84,14 @@ for k = 1:K
             % Collect predictions
             yValidPred = method(XTr, yTr, XValid);
 
-            % Compute error
+            % Compute error for this cluster
             e = computeRmse(yValidPred - yValid);
             %fprintf(num2str(e));
             rmse(k, seed, methodNo) = e;
+            
+            % Save data for global RMSE
+            globalPred{k}{seed}{methodNo} = yValidPred;
+            globalValid{k}{seed}{methodNo} = yValid;
         end
         
         fprintf('\n');
@@ -107,13 +111,21 @@ end
 fprintf('I am nearly finished...\n');
 
 % Combine each cluster error together
-e = rmse .^ 2;
-e = mean(e, 1);
-e = e .^ 0.5;
-e = reshape(e, S, M);
+err = zeros(S, M);
+for s = 1:S
+    for m = 1:M
+        pred = [];
+        valid = [];
+        for k = 1:K
+            pred = [ pred ; globalPred{k}{s}{m} ];
+            valid = [ valid ; globalValid{k}{s}{m} ];
+        end
+        err(s, m) = computeRmse(valid - pred);
+    end
+end
 
 figure('Name', 'Overall RMSE');
-boxplot(e, 1:M);
+boxplot(err, 1:M);
 legend(findobj(gca,'Tag','Box'), methodNames);
 xlabel('methods');
 ylabel('RMSE');
