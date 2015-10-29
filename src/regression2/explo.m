@@ -22,8 +22,8 @@ features{2} = setdiff(1:67, [... % all features minus the following:
 % 4 13 14 17 18 19 20 23 29 31 35 37 39 43 48 59 60 63 65 67
 
 % Found by removing one feature after the other manually on 1+x+x^2+x^3
-% model (x per feature) (26 features)
-features{3} = [ 4 5 6 10 20 21 26 27 30 31 32 34 35 36 37 45 46 49 50 51 53 54 56 59 63 65 ];
+% model (x per feature) (22 features)
+features{3} = [ 1   3   5   7   9  15  26  30  31  32  33  34  38  40  42  44  46  50  56  57  58  61 ];
 
 methods = {
    %{ trim features, algo, name }
@@ -146,10 +146,18 @@ clear all;
 
 polo = Polo();
 
+% k = 3, PHI = x            -> median = 145,    keep 23
+% k = 3, PHI = x+x²         -> median = 20,     keep 30
+% k = 3, PHI = x+x²+x³      -> median = 7.3,    keep 22 << BEST
+% k = 3, PHI = x+x²+x³+x⁴   -> median = 7.6,    keep 22
+
 S = 10;
 splitRatio = 0.7;
 k = 3;
 method = @polo.basisFunctionsMethod;
+computeScore = @(rmse) median(rmse);
+% computeScore = @(rmse) mean(rmse);
+% computeScore = @(rmse) mean(rmse) + std(rmse);
 
 [~, clusters] = polo.clusterize();
 
@@ -157,7 +165,7 @@ fprintf('I am starting...\n');
 
 % Baseline all features
 features = 1:67;
-fprintf(['Baseline: processing seed [' num2str(S) '] ']);
+fprintf(['Baseline: seed [' num2str(S) '] ']);
 for seed = 1:S
     fprintf([num2str(seed) '  ']);
     setSeed(seed);
@@ -177,26 +185,27 @@ for seed = 1:S
     yValidPred = method(XTr, yTr, XValid);
 
     % Compute error
-    rmse(seed) = computeRmse(yValidPred - yValid);
+    rmseOrig(seed) = computeRmse(yValidPred - yValid);
 end
 
 fprintf('\n');
 
-bestMedian = median(rmse);
-fprintf(['baseline: ' num2str(bestMedian) '\n']);
-        
-for suspect = 1:67
+bestScore = computeScore(rmseOrig);
+fprintf(['baseline: ' num2str(bestScore) '\n']);
+
+suspectSet = 1:67;
+for suspect = suspectSet
     oldFs = features;
     features = setdiff(features, suspect);
     
     cluster = clusters{k};
     [~, cluster] = polo.deleteYOutliers(cluster);
 
-    fprintf(['processing suspect ' num2str(suspect) '\n']);
+    fprintf(['processing suspect ' num2str(suspect) '...']);
 
     cluster = polo.trimFeatures(cluster, features);
     
-    fprintf(['\tprocessing seed [' num2str(S) '] ']);
+    fprintf(['\tseed [' num2str(S) '] ']);
     for seed = 1:S
         fprintf([num2str(seed) '  ']);
         setSeed(seed);
@@ -213,25 +222,52 @@ for suspect = 1:67
         yValidPred = method(XTr, yTr, XValid);
 
         % Compute error
-        rmse(seed) = computeRmse(yValidPred - yValid);
+        rmseTmp(seed) = computeRmse(yValidPred - yValid);
     end
 
     fprintf('\n');
     
-    %boxplot(rmse);
-    
-    med = median(rmse);
-    fprintf(['current median: ' num2str(med) '\n']);
-    if (med < bestMedian)
-        fprintf(['better! -> removing ' num2str(suspect) 'th feature\n']);
-        bestMedian = med;
+    score = computeScore(rmseTmp);
+    fprintf(['Best score: ' num2str(bestScore) '\tCurrent score: ' num2str(score)]);
+    if (score < bestScore)
+        fprintf(['\tbetter! -> removing ' num2str(suspect) 'th feature\n']);
+        bestScore = score;
     else
-        fprintf(['worse! -> keeping ' num2str(suspect) 'th feature\n']);
+        fprintf(['\tworse!  -> keeping  ' num2str(suspect) 'th feature\n']);
         features = oldFs;
     end
 end
 
 fprintf('I am finished now!\n');
-fprintf(['for k = ' num2str(k) ' we have these important features:\n' num2str(features) '\n']);
+fprintf(['for k = ' num2str(k) ' we have these important features (' ...
+         num2str(length(features)) '):\n' num2str(features) '\n']);
 
+fprintf('Computing RMSE with the trimmed set of features');
+for seed = 1:S
+    fprintf([num2str(seed) '  ']);
+    setSeed(seed);
+    
+    cluster = clusters{k};
+    [~, cluster] = polo.deleteYOutliers(cluster);
+    cluster = polo.trimFeatures(cluster, features);
+
+    % Split data into training and validation sets
+    N = size(cluster.train.X, 1);
+    idx = randperm(N);
+    X = cluster.train.X(idx, :);
+    y = cluster.train.y(idx);
+
+    [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
+
+    % Collect predictions
+    yValidPred = method(XTr, yTr, XValid);
+
+    % Compute error
+    rmseTrimmed(seed) = computeRmse(yValidPred - yValid);
+end
+
+figure('Name', 'RMSE for full feature set & trimmed set');
+boxplot([rmseOrig' rmseTrimmed']);
+hold on;
+legend(findobj(gca,'Tag','Box'), 'full', 'trimmed');
 
