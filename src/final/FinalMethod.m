@@ -46,7 +46,7 @@ classdef FinalMethod
                 [~, cluster] = self.deleteYOutliers(cluster);
                 
                 % Remove features that we believe are problematic
-                cluster = self.trimFeatures(cluster, obj.features{k});
+                cluster = self.trimFeatures(cluster, self.features{k});
                 
                 % Apply basis functions
                 cluster.train.tX = self.map(phis, cluster.train.X);
