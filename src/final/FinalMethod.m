@@ -28,7 +28,8 @@ classdef FinalMethod
             idx_valid = self.clusterIndex(XValid);
             idx_test = self.clusterIndex(XTest);
             
-            phis = self.buildPhis();
+            D = size(XTrain, 2);
+            phis = self.buildPhis(D);
 
             % Split training, validation and testing data & group them into
             % the three clusters we manually identified
@@ -104,14 +105,13 @@ classdef FinalMethod
             data.test.X(:, removeIdx) = [];
         end
         
-        function phis = buildPhis(~)
+        function phis = buildPhis(~, D)
             % Build basis functions
             power = @(i, x) x .^ i;
             
             p = 1;
             phis{p} = @(x) 1;
             
-            D = size(XTr, 2);
             for d = 1:D
                 p = p + 1; phis{p} = @(x) power(1, x(d));
                 p = p + 1; phis{p} = @(x) power(2, x(d));
