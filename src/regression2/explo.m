@@ -122,7 +122,7 @@ for s = 1:S
     end
 end
         
-display(err, 'rmse');
+display(median(err), 'median of RMSE per method');
 
 
 figure('Name', 'Overall RMSE');

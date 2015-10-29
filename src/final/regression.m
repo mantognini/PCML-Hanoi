@@ -10,11 +10,12 @@ S = 10;
 splitRatio = 0.7;
 
 % define method
-obj = FinalMethod();
+obj = FinalMethod(true, true);
 method = @obj.apply;
 
+
 % A final seed
-setSeed(1);
+setSeed(S);
 
 % Split data into training and validation sets
 N = size(data.train.X, 1);
@@ -28,6 +29,7 @@ y = data.train.y(idx);
 
 % Compute error for this cluster
 e = computeRmse(yValidPred - yValid);
+
 display(e, 'rmse');
 
 % todo: save yTestPred

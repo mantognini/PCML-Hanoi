@@ -4,10 +4,12 @@ classdef FinalMethod
     
     properties
         features % {1,2,3}: list of feature to keep
+        debug % logical value, if on display graphs
+        clusterManual % if true -> manual otherwise kmeans based
     end
     
     methods
-        function obj = FinalMethod()
+        function obj = FinalMethod(debug, clusterManual)
             obj.features{1} = [ 4 6 7 10 11 12 13 14 16 19 21 22 24 26 28 29 ...
                 30 35 36 37 38 42 44 45 46 49 50 51 53 54 55 56 57 58 59 ...
                 64 66 ];
@@ -15,6 +17,9 @@ classdef FinalMethod
                 48 59 60 63 65 67];
             obj.features{3} = [ 1 3 5 7 9 15 26 30 31 32 33 34 38 40 42 44 ...
                 46 50 56 57 58 61 ];
+            
+            obj.debug = debug;
+            obj.clusterManual = clusterManual;
         end
         
         % Apply best overall strategy
@@ -24,15 +29,22 @@ classdef FinalMethod
             yTest = zeros(size(XTest, 1), 1);
             
             % Indexes range over 1, 2 and 3 for our three clusters
-            idx_train = self.clusterIndex(XTrain);
-            idx_valid = self.clusterIndex(XValid);
-            idx_test = self.clusterIndex(XTest);
+            if self.clusterManual
+                idx_train = self.clusterIndex(XTrain);
+                idx_valid = self.clusterIndex(XValid);
+                idx_test = self.clusterIndex(XTest);
+            else
+                [idx_train, idx_valid, idx_test] = self.clusterIndex2(XTrain, yTrain, XValid, XTest);
+            end
 
             % Split training, validation and testing data & group them into
             % the three clusters we manually identified
             K = 3;
+            if (self.debug)
+            subplot(2, 2, 4);
+            end
             for k = 1:K
-                fprintf(['k = ' num2str(k) '\n']);
+%                 fprintf(['k = ' num2str(k) '\n']);
                 
                 cluster.train.X = XTrain(idx_train == k, :);
                 cluster.train.y = yTrain(idx_train == k, :);
@@ -42,10 +54,22 @@ classdef FinalMethod
                 cluster.test.X = XTest(idx_test == k, :);
             
                 % Remove misclassified training data
-                [~, cluster] = self.deleteYOutliers(cluster);
+                [i, cluster] = self.deleteYOutliers(cluster);
+%                 i = 0;
+                [j, cluster] = self.deleteXOutliers(cluster);
+%                 j = 0;
+                fprintf(['removed ' num2str(i + j) ' outliers for cluster ' num2str(k) '\n']);
+                
+                if (self.debug)
+                plot3(cluster.train.X(:, 25), ... % X25, training, cluster k
+                      cluster.train.X(:, 62), ... % X62, training, cluster k
+                      cluster.train.y,        ... % y,   training, cluster k
+                      '.', 'MarkerSize', 30);
+                hold on;
+                end
                 
                 % Remove features that we believe are problematic
-                cluster = self.trimFeatures(cluster, self.features{k});
+                %cluster = self.trimFeatures(cluster, self.features{k});
                 
 %                 % Normalise training, validation and test using training's 
 %                 % mean and variance
@@ -74,7 +98,7 @@ classdef FinalMethod
                 
                 % Build basis functions
                 D = size(cluster.train.X, 2);
-                phis = self.buildPhis(D);
+                phis = self.buildPhis(D, k);
                 
                 % Apply basis functions
                 cluster.train.tX = self.map(phis, cluster.train.X);
@@ -95,6 +119,108 @@ classdef FinalMethod
                 yValid(idx_valid == k) = cluster.valid.y;
                 yTest(idx_test == k) = cluster.test.y;
             end
+            
+            if (self.debug)
+            xlabel('25th feature');
+            xlim([10 20]);
+            ylabel('62th feature');
+            ylim([0 30]);
+            zlabel('response');
+            title('TRAINING - outliers');
+            grid on;
+            end
+        end
+        
+        function [idxTrain, idxValid, idxTest] = clusterIndex2(self, XTrain, yTrain, XValid, XTest)
+            XTr = [ XTrain(:, 25) XTrain(:, 62) ];
+            XVa = [ XValid(:, 25) XValid(:, 62) ];
+            XTe = [ XTest(:, 25) XTest(:, 62) ];
+            
+            % Clusterize data
+            K = 3;
+            C = [ 12, 12, 1800 ; 12, 18, 5000 ; 17, 18, 8000 ];
+            idxTrain = kmeans([XTr yTrain], K, 'MaxIter', 1000, 'Start', C);
+%             idxTrain = cluster(fitgmdist([XTr yTrain], K), [XTr yTrain]); % this variante can achieve better results but can be unstable
+
+            % Print result
+            if (self.debug)
+            figure('Name', 'Clustering using response');
+            subplot(2, 2, 1);
+            end
+            mus = zeros(K, 2);
+            sigmas = zeros(K, 2);
+            for k = 1:K
+                if (self.debug)
+                plot3(XTr(idxTrain == k, 1), ... % X25, training, cluster k
+                      XTr(idxTrain == k, 2), ... % X62, training, cluster k
+                      yTrain(idxTrain == k), ... % y,   training, cluster k
+                      '.', 'MarkerSize', 30);
+                hold on;
+                end
+
+                mu25 = mean(XTr(idxTrain == k, 1));
+                mu62 = mean(XTr(idxTrain == k, 2));
+
+                std25 = std(XTr(idxTrain == k, 1));
+                std62 = std(XTr(idxTrain == k, 2));
+
+                mus(k, :) = [ mu25 , mu62 ];
+                sigmas(k, :) = [ std25 , std62 ];
+            end
+            if (self.debug)
+            xlabel('25th feature');
+            xlim([10 20]);
+            ylabel('62th feature');
+            ylim([0 30]);
+            zlabel('response');
+            title('TRAINING');
+            grid on;
+            % axis square;
+            end
+
+            % Compute probabilites of being in a cluster
+            pVa = zeros(size(XVa, 1), K);
+            pTe = zeros(size(XTe, 1), K);
+            for k = 1:K
+                pVa(:, k) = mvnpdf(XVa, mus(k, :), sigmas(k, :));
+                pTe(:, k) = mvnpdf(XTe, mus(k, :), sigmas(k, :));
+            end
+
+            [~, idxValid] = max(pVa, [], 2);
+            [~, idxTest] = max(pTe, [], 2);
+            
+            
+            if (self.debug)
+            subplot(2, 2, 2);
+            for k = 1:K
+                plot(XVa(idxValid == k, 1), ... % X25, validation, cluster k
+                     XVa(idxValid == k, 2), ... % X62, validation, cluster k
+                     '.', 'MarkerSize', 30);
+                hold on;
+            end
+            xlabel('25th feature');
+            xlim([10 20]);
+            ylabel('62th feature');
+            ylim([0 30]);
+            title('VALIDATION');
+            grid on;
+            % axis square;
+            
+            subplot(2, 2, 3);
+            for k = 1:K
+                plot(XTe(idxTest == k, 1), ... % X25, validation, cluster k
+                     XTe(idxTest == k, 2), ... % X62, validation, cluster k
+                     '.', 'MarkerSize', 30);
+                hold on;
+            end
+            xlabel('25th feature');
+            xlim([10 20]);
+            ylabel('62th feature');
+            ylim([0 30]);
+            title('TEST');
+            grid on;
+            % axis square;
+            end
         end
         
         function idx = clusterIndex(~, X)
@@ -113,11 +239,36 @@ classdef FinalMethod
             idx = idx62 + (idx25 & idx62) + 1;
         end
         
+        function [dels, data] = deleteXOutliers(~, data)
+            STD = 4;
+            
+            %X = data.train.X;
+            X = [ data.train.X(25, :) data.train.X(62, :) ];
+            
+            sigma = std(X);
+            mu = mean(X);
+            
+            muV = repmat(mu, size(X, 1), 1);
+            sigmaV = repmat(sigma, size(X, 1), 1);
+            
+            idx = abs(X - muV) >= STD * sigmaV;
+            idx = any(idx, 2);
+            
+            dels = length(find(idx));
+
+            data.train.X(idx, :) = [];
+            data.train.y(idx, :) = [];
+        end
+        
         function [dels, data] = deleteYOutliers(~, data)
+            STD = 3;
+            
             y = data.train.y;
+            
             sigma = std(y);
             mu = mean(y);
-            idx = abs(y - mu) >= 2 * sigma;
+            
+            idx = abs(y - mu) >= STD * sigma;
             
             dels = length(find(idx));
 
@@ -136,7 +287,7 @@ classdef FinalMethod
             data.test.X(:, removeIdx) = [];
         end
         
-        function phis = buildPhis(~, D)
+        function phis = buildPhis(~, D, k)
             % Build basis functions
             power = @(i, x) x .^ i;
             
@@ -144,9 +295,24 @@ classdef FinalMethod
             phis{p} = @(x) 1;
             
             for d = 1:D
-                p = p + 1; phis{p} = @(x) power(1, x(d));
-                p = p + 1; phis{p} = @(x) power(2, x(d));
-                p = p + 1; phis{p} = @(x) power(3, x(d));
+                if k == 1
+%                     p = p + 1; phis{p} = @(x) sign(x(d)) * power(1/2, sign(x(d)) * x(d));
+                    p = p + 1; phis{p} = @(x) power(1, x(d));
+                    p = p + 1; phis{p} = @(x) power(3, x(d));
+                    p = p + 1; phis{p} = @(x) power(5, x(d));
+                end
+                
+                if k == 2
+%                     p = p + 1; phis{p} = @(x) sign(x(d)) * power(1/2, sign(x(d)) * x(d));
+%                     p = p + 1; phis{p} = @(x) power(1, x(d));
+                    p = p + 1; phis{p} = @(x) power(3, x(d));
+                end
+                
+                if k == 3
+%                     p = p + 1; phis{p} = @(x) sign(x(d)) * power(1/2, sign(x(d)) * x(d));
+%                     p = p + 1; phis{p} = @(x) power(1, x(d));
+                    p = p + 1; phis{p} = @(x) power(3, x(d));
+                end
             end
         end
         

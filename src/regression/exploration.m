@@ -7,6 +7,103 @@ X_trainN = normalize(X_train);
 X_testN  = normalize(X_test);
 
 
+%% Clustering using response on part of the data to determine cluster of rest of the data
+
+X25 = X_train(:, 25);
+X62 = X_train(:, 62);
+X = [X25 X62];
+clear X25 X62;
+
+splitRatio = 0.7;
+% seed = 2;
+% setSeed(seed);
+
+% Split data into training and validation sets
+N = size(X, 1);
+idx = randperm(N);
+NTr = floor(splitRatio * N);
+idxTr = idx(1:NTr);
+idxVa = idx(NTr+1:end);
+XTr = X(idxTr, :);
+yTr = y_train(idxTr);
+XVa = X(idxVa, :);
+yVa = y_train(idxVa);
+clear idx NTr N;
+
+% Clusterize data
+K = 3;
+% C = [ 12, 12, 1800 ; 12, 18, 5000 ; 17, 18, 8000 ];
+% idxTr = kmeans([XTr yTr], K, 'MaxIter', 1000, 'Start', C);
+% idxTr = kmeans([XTr yTr], K, 'MaxIter', 1000, 'Distance', 'cityblock');
+idxTr = cluster(fitgmdist([XTr yTr], K), [XTr yTr]); % this variante can achieve better results but can be unstable
+
+
+% Print result
+figure('Name', 'Clustering using response');
+subplot(1, 2, 1);
+mus = zeros(K, 2);
+sigmas = zeros(K, 2);
+for k = 1:K
+    plot3(XTr(idxTr == k, 1), ... % X25, training, cluster k
+          XTr(idxTr == k, 2), ... % X62, training, cluster k
+          yTr(idxTr == k),    ... % y,   training, cluster k
+          '.', 'MarkerSize', 30);
+    hold on;
+    
+    mu25 = mean(XTr(idxTr == k, 1));
+    mu62 = mean(XTr(idxTr == k, 2));
+    
+    std25 = std(XTr(idxTr == k, 1));
+    std62 = std(XTr(idxTr == k, 2));
+    
+    mus(k, :) = [ mu25 , mu62 ];
+    sigmas(k, :) = [ std25 , std62 ];
+    
+%     fprintf(['cluster k = ' num2str(k) ': X25 ->\t ? = ' num2str(mu25) ...
+%              '\tstd = ' num2str(std25) '\n']);
+%     fprintf(['cluster k = ' num2str(k) ': X62 ->\t ? = ' num2str(mu62) ...
+%              '\tstd = ' num2str(std62) '\n']);
+         
+    clear mu25 mu62 std25 std62;
+end
+xlabel('25th feature');
+xlim([10 20]);
+ylabel('62th feature');
+ylim([0 30]);
+zlabel('response');
+title('TRAINING');
+grid on;
+% axis square;
+
+% Compute probabilites of being in a cluster
+pVa = zeros(size(XVa, 1), K);
+for k = 1:K
+    pVa(:, k) = mvnpdf(XVa, mus(k, :), sigmas(k, :));
+end
+clear mus sigmas;
+
+[~, idxVa] = max(pVa, [], 2);
+clear pVa;
+
+% Print result
+subplot(1, 2, 2);
+for k = 1:K
+    plot3(XVa(idxVa == k, 1), ... % X25, validation, cluster k
+          XVa(idxVa == k, 2), ... % X62, validation, cluster k
+          yVa(idxVa == k),    ... % y,   validation, cluster k
+          '.', 'MarkerSize', 30);
+    hold on;
+end
+xlabel('25th feature');
+xlim([10 20]);
+ylabel('62th feature');
+ylim([0 30]);
+zlabel('response');
+title('VALIDATION');
+grid on;
+% axis square;
+
+
 %% Display all plots
 nbDim = size(X_train, 2);
 plotDim = [4, 4];
@@ -226,9 +323,9 @@ K = 3;
 X25 = X_train(:, 25);
 X62 = X_train(:, 62);
 X = [X25 X62 y_train];
-idx_validation = kmeans(X, K, 'MaxIter', 1000, 'Distance', 'cityblock');
+%idx_validation = kmeans(X, K, 'MaxIter', 1000, 'Distance', 'cityblock');
 %idx_validation = clusterdata(X, 'linkage', 'average', 'distance', 'cityblock', 'maxclust', K);
-%idx_validation = cluster(fitgmdist(X, K), X); % this variante can achieve better results but can be unstable
+idx_validation = cluster(fitgmdist(X, K), X); % this variante can achieve better results but can be unstable
 
 figure('Name', 'Clustering using response');
 for k = 1:K
