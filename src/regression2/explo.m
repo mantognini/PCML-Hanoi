@@ -148,15 +148,12 @@ polo = Polo();
 
 S = 10;
 splitRatio = 0.7;
-k = 1;
+k = 3;
 method = @polo.basisFunctionsMethod;
 
 [~, clusters] = polo.clusterize();
 
 fprintf('I am starting...\n');
-    
-cluster = clusters{k};
-[~, cluster] = polo.deleteYOutliers(cluster);
 
 % Baseline all features
 features = 1:67;
@@ -164,6 +161,9 @@ fprintf(['Baseline: processing seed [' num2str(S) '] ']);
 for seed = 1:S
     fprintf([num2str(seed) '  ']);
     setSeed(seed);
+    
+    cluster = clusters{k};
+    [~, cluster] = polo.deleteYOutliers(cluster);
 
     % Split data into training and validation sets
     N = size(cluster.train.X, 1);
@@ -188,6 +188,9 @@ fprintf(['baseline: ' num2str(bestMedian) '\n']);
 for suspect = 1:67
     oldFs = features;
     features = setdiff(features, suspect);
+    
+    cluster = clusters{k};
+    [~, cluster] = polo.deleteYOutliers(cluster);
 
     fprintf(['processing suspect ' num2str(suspect) '\n']);
 
