@@ -27,9 +27,6 @@ classdef FinalMethod
             idx_train = self.clusterIndex(XTrain);
             idx_valid = self.clusterIndex(XValid);
             idx_test = self.clusterIndex(XTest);
-            
-            D = size(XTrain, 2);
-            phis = self.buildPhis(D);
 
             % Split training, validation and testing data & group them into
             % the three clusters we manually identified
@@ -47,6 +44,10 @@ classdef FinalMethod
                 
                 % Remove features that we believe are problematic
                 cluster = self.trimFeatures(cluster, self.features{k});
+                
+                % Build basis functions
+                D = size(cluster.train.X, 2);
+                phis = self.buildPhis(D);
                 
                 % Apply basis functions
                 cluster.train.tX = self.map(phis, cluster.train.X);
