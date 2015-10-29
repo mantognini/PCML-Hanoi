@@ -32,6 +32,8 @@ classdef FinalMethod
             % the three clusters we manually identified
             K = 3;
             for k = 1:K
+                fprintf(['k = ' num2str(k) '\n']);
+                
                 cluster.train.X = XTrain(idx_train == k, :);
                 cluster.train.y = yTrain(idx_train == k, :);
                 
@@ -45,6 +47,31 @@ classdef FinalMethod
                 % Remove features that we believe are problematic
                 cluster = self.trimFeatures(cluster, self.features{k});
                 
+%                 % Normalise training, validation and test using training's 
+%                 % mean and variance
+%                 mu = mean(cluster.train.X);
+% 
+%                 muV = repmat(mu, size(cluster.train.X, 1), 1);
+%                 cluster.train.X = cluster.train.X - muV;
+% 
+%                 muV = repmat(mu, size(cluster.valid.X, 1), 1);
+%                 cluster.valid.X = cluster.valid.X - muV;
+%                 
+%                 muV = repmat(mu, size(cluster.test.X, 1), 1);
+%                 cluster.test.X = cluster.test.X - muV;
+% 
+%                 sigma = std(cluster.train.X);
+%                 if sigma ~= 0
+%                     sigmaV = repmat(sigma, size(cluster.train.X, 1), 1);
+%                     cluster.train.X = cluster.train.X ./ sigmaV;
+% 
+%                     sigmaV = repmat(sigma, size(cluster.valid.X, 1), 1);
+%                     cluster.valid.X = cluster.valid.X ./ sigmaV;
+% 
+%                     sigmaV = repmat(sigma, size(cluster.test.X, 1), 1);
+%                     cluster.test.X = cluster.test.X ./ sigmaV;
+%                 end
+                
                 % Build basis functions
                 D = size(cluster.train.X, 2);
                 phis = self.buildPhis(D);
@@ -56,7 +83,9 @@ classdef FinalMethod
                 
                 % Find model parameters
                 cluster.lambda = bestLambdaKFold(cluster.train.y, cluster.train.tX, 10);
+%                 display(cluster.lambda, 'lambda');
                 cluster.beta = ridgeRegression(cluster.train.y, cluster.train.tX, cluster.lambda);
+%                 display(cluster.beta, 'beta');
                 
                 % Compute prediction
                 cluster.valid.y = cluster.valid.tX * cluster.beta;
@@ -100,6 +129,7 @@ classdef FinalMethod
             D = size(data.train.X, 2);
             
             removeIdx = setdiff(1:D, keepIdx);
+%             display(removeIdx, 'removeIdx');
             
             data.train.X(:, removeIdx) = [];
             data.valid.X(:, removeIdx) = [];

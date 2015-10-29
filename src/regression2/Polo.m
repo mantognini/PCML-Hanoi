@@ -24,27 +24,30 @@ classdef Polo
         end
         
         function yValid = basisFunctionsMethod(polo, XTr, yTr, XValid)
-            % Normalise XTr & XValid using XTr mean and variance
-            mu = mean(XTr);
-            
-            muV = repmat(mu, size(XTr, 1), 1);
-            XTr = XTr - muV;
-            
-            muV = repmat(mu, size(XValid, 1), 1);
-            XValid = XValid - muV;
-            
-            sigma = std(XTr);
-            if sigma ~= 0
-                sigmaV = repmat(sigma, size(XTr, 1), 1);
-                XTr = XTr ./ sigmaV;
-                
-                sigmaV = repmat(sigma, size(XValid, 1), 1);
-                XValid = XValid ./ sigmaV;
-            end
+%             % Normalise XTr & XValid using XTr mean and variance
+%             mu = mean(XTr);
+%             
+%             muV = repmat(mu, size(XTr, 1), 1);
+%             XTr = XTr - muV;
+%             
+%             muV = repmat(mu, size(XValid, 1), 1);
+%             XValid = XValid - muV;
+%             
+%             sigma = std(XTr);
+%             if sigma ~= 0
+%                 sigmaV = repmat(sigma, size(XTr, 1), 1);
+%                 XTr = XTr ./ sigmaV;
+%                 
+%                 sigmaV = repmat(sigma, size(XValid, 1), 1);
+%                 XValid = XValid ./ sigmaV;
+%             end
+
+            [XTr, yTr] = polo.deleteYOutliers(XTr, yTr);
             
             % Build basis functions
             power = @(i, x) x .^ i;
-            sigma = @(x) 1 / (1 + exp(-x));
+            %sigma = @(x) 1 / (1 + exp(-x));
+            
             p = 1;
             phis{p} = @(x) 1;
             
@@ -62,6 +65,7 @@ classdef Polo
             tXTrPhi = polo.map(phis, XTr);
             %beta = leastSquaresGDLS(yTr, tXTrPhi); % not good with unnormilized values
             lambda = bestLambdaKFold(yTr, tXTrPhi, 10);
+%             display(lambda, 'lambda');
             beta = ridgeRegression(yTr, tXTrPhi, lambda);
             
             tXValidPhi = polo.map(phis, XValid);
@@ -116,22 +120,22 @@ classdef Polo
         end
         
         
-        function [dels, data] = deleteYOutliers(~, data)
-            y = data.train.y;
-            sigma = std(y);
-            mu = mean(y);
-            idx = abs(y - mu) >= 2 * sigma;
+        function [XTr, yTr] = deleteYOutliers(~, XTr, yTr)
+            sigma = std(yTr);
+            mu = mean(yTr);
+            idx = abs(yTr - mu) >= 2 * sigma;
             
-            dels = length(find(idx));
+            %dels = length(find(idx));
 
-            data.train.X(idx, :) = [];
-            data.train.y(idx, :) = [];
+            XTr(idx, :) = [];
+            yTr(idx, :) = [];
         end
         
         
         function data = trimFeatures(~, data, keepIdx)
             D = size(data.train.X, 2);
             removeIdx = setdiff(1:D, keepIdx);
+%             display(removeIdx, 'removeIdx');
             data.train.X(:, removeIdx) = [];
             data.test.X(:, removeIdx) = [];
         end
