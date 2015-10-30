@@ -4,7 +4,7 @@ function lambda = bestLambdaKFold(y, tX, K)
 %   and taking the minimum avg error estimate.
 %
     % Define lambdas range
-    lambdas = logspace(-4, 4, 50);
+    lambdas = logspace(-10, 10, 200);
 
     % Compute K-Fold CV indices
     N = size(y, 1);
@@ -50,11 +50,13 @@ function lambda = bestLambdaKFold(y, tX, K)
     % Best lambda
     [minMeanTe, lambdaIdStars] = min(mseTe(:));
     lambda = lambdas(lambdaIdStars);
+    
+    print(lambdas, lambda, minMeanTe, mseTr, mseTe);
 
 end
 
 %% Put break point after line 52 and run the following to plot curves
-function print()
+function print(lambdas, lambda, minMeanTe, mseTr, mseTe)
     figure('Name', 'bestLambdaKFold');
     semilogx(lambdas, mseTr, 'r-o', lambdas, mseTe, 'b-x');
     hold on;
