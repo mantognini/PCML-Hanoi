@@ -6,7 +6,7 @@ function [XTr, yTr, XTe, yTe] = doSplit(y, X, prop)
 %
     % Get indices
     N = size(y,1);
-	idx = 1:N;
+	idx = randperm(N);%1:N;
     Ntr = floor(prop * N);
     idxTr = idx(1:Ntr);
     idxTe = idx(Ntr+1:end);

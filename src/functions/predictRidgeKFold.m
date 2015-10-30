@@ -12,9 +12,10 @@ function yValidPred = predictRidgeKFold(XTr, yTr, XValid, K, phi, d)
     tXTr = [ones(N, 1) phi(XTr, d)];
     
     lambda = bestLambdaKFold(yTr, tXTr, min(K, N));
-    beta = ridgeRegression(yTr,tXTr, lambda);
+    beta = ridgeRegression(yTr, tXTr, lambda);
+    %disp(beta);
     
     NValid = size(XValid, 1);
     tXValid = [ones(NValid, 1) phi(XValid, d)];
-    yValidPred = tXValid*beta;
+    yValidPred = tXValid * beta;
 end

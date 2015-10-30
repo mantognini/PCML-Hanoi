@@ -10,20 +10,23 @@ function magellan()
     filterOutliersFlag = false;
 %     method = @meanMethod;
 %     method = @GDLSMethod;
-    method = @linearRidgeKFoldMethod;
+%     method = @linearRidgeKFoldMethod;
 %     method = @emplifiedRidgeKFoldMethod;
+    method = @finalMethod;
 
     [X_train, y_train, ~] = loadData();
     
     % Split into training & validation sets
-    %setSeed(splitSeed);
+    setSeed(splitSeed);
     [XTr, yTr, XVa, yVa] = doSplit(y_train, X_train, splitRatio);
     
     % Clusterize data
     if (clusterManuallyFlag)
         [idxTr, idxVa] = manualClustering(XTr, yTr, XVa);
     else
-        [idxTr, idxVa] = autoClustering(XTr, yTr, XVa);
+        %[idxTr, idxVa] = autoClustering(XTr, yTr, XVa);
+        idxTr = ones(size(XTr, 1), 1);
+        idxVa = ones(size(XVa, 1), 1);
     end
     
     % Display clusterized data
@@ -140,9 +143,9 @@ function [yVaPred] = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa)
     yVaPred = zeros(size(XVa, 1), 1);
     
     for k = 1:3
-        kXTr = XTr(idxTr == k);
-        kyTr = yTr(idxTr == k);
-        kXVa = XVa(idxVa == k);
+        kXTr = XTr(idxTr == k, :);
+        kyTr = yTr(idxTr == k, :);
+        kXVa = XVa(idxVa == k, :);
         
         yVaPred(idxVa == k) = method(kXTr, kyTr, kXVa, k);
     end
@@ -172,12 +175,26 @@ function [kyVaPred] = linearRidgeKFoldMethod(kXTr, kyTr, kXVa, ~)
 end
 
 function [kyVaPred] = emplifiedRidgeKFoldMethod(kXTr, kyTr, kXVa, k)
-    K = 10;
+    K = 5;
     if k == 1
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 2);
-    else
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 2);
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 4);
+    elseif k == 3
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     end
+end
+
+function [kyVaPred] = finalMethod(kXTr, kyTr, kXVa, k)
+    fm = FinalMethod(false, true);
+    D = size(kXTr, 2);
+    kPhis = fm.buildPhis(D, k);
+    ktXTr = fm.map(kPhis, kXTr);
+    ktXVa = fm.map(kPhis, kXVa);
+    
+    K = 10;
+    kLambda = bestLambdaKFold(kyTr, ktXTr, K);
+    kBeta = ridgeRegression(kyTr, ktXTr, kLambda);
+    
+    kyVaPred = ktXVa * kBeta;
 end
