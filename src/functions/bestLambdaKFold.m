@@ -4,7 +4,7 @@ function lambda = bestLambdaKFold(y, tX, K)
 %   and taking the minimum avg error estimate.
 %
     % Define lambdas range
-    lambdas = logspace(-5, 9, 50);
+    lambdas = logspace(-5, 12, 100);
 
     % Compute K-Fold CV indices
     N = size(y, 1);
