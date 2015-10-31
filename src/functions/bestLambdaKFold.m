@@ -51,7 +51,7 @@ function lambda = bestLambdaKFold(y, tX, K)
     [minMeanTe, lambdaIdStars] = min(mseTe(:));
     lambda = lambdas(lambdaIdStars);
     
-    print(lambdas, lambda, minMeanTe, mseTr, mseTe);
+    %print(lambdas, lambda, minMeanTe, mseTr, mseTe);
 
 end
 

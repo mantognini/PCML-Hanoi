@@ -1,32 +1,64 @@
 function magellan()
     % A better explorator than Polo (hopefully)
+
+    methods = {
+        % method, manual cluster, remove outliers, name %
+        { @meanMethod, true, false, 'mean' },
+        { @GDLSMethod, true, false, 'GDLS' },
+%         { @GDLSMethod, true, true, 'GDLS - outliers' },
+%         { @GDLSMethod, false, false, 'GDLS - auto' },
+%         { @GDLSMethod, false, true, 'GDLS - auto - outliers' },
+%         { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
+%         { @linearRidgeKFoldMethod, true, true, 'linear rigde - outliers' },
+%         { @linearRidgeKFoldMethod, false, false, 'linear rigde - auto' },
+%         { @linearRidgeKFoldMethod, false, true, 'linear rigde - auto - outliers' },
+%         { @emplifiedRidgeKFoldMethod, true, false, 'emplified ridge' },
+%         { @emplifiedRidgeKFoldMethod, true, true, 'emplified ridge - outliers' },
+%         { @emplifiedRidgeKFoldMethod, false, false, 'emplified ridge - auto' },
+%         { @emplifiedRidgeKFoldMethod, false, true, 'emplified ridge - auto -outliers' },
+%         { @finalMethod, true, false, 'phis' },
+%         { @finalMethod, true, true, 'phis - outliers' },
+%         { @finalMethod, false, false, 'phis - auto' },
+%         { @finalMethod, false, true, 'phis - auto - outliers' },
+    };
+
+    M = numel(methods);
+    S = 1;
+    global rmse; % keep it alive between runs
+    rmse = zeros(S, M);
+    for s = 1:S
+        for m = 1:M
+            rmse(s, m) = runMethod(methods{m}{1}, methods{m}{2}, methods{m}{3});
+        end
+    end
     
+    figure;
+    boxplot(rmse, 1:M);
+    methodNames = cellfun(@(x) x{4}, methods, 'UniformOutput', false);
+    legend(findobj(gca,'Tag','Box'), methodNames);
+    xlabel('methods');
+    ylabel('RMSE');
+end
+
+
+function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
     % SETTINGS
-    splitSeed = 42;
+    %splitSeed = 42;
     splitRatio = 0.7;
-    clusterManuallyFlag = true;
-    displayClustersFlag = true;
-    displayResultsFlag = true;
-    filterOutliersFlag = false;
-%     method = @meanMethod;
-%     method = @GDLSMethod;
-%     method = @linearRidgeKFoldMethod;
-%     method = @emplifiedRidgeKFoldMethod;
-    method = @finalMethod;
+    displayClustersFlag = false;%true;
+    displayResultsFlag = false;%true;
 
     [X_train, y_train, ~] = loadData();
     
     % Split into training & validation sets
-    setSeed(splitSeed);
+    %setSeed(splitSeed);
     [XTr, yTr, XVa, yVa] = doSplit(y_train, X_train, splitRatio);
     
     % Clusterize data
     if (clusterManuallyFlag)
         [idxTr, idxVa] = manualClustering(XTr, yTr, XVa);
     else
-        %[idxTr, idxVa] = autoClustering(XTr, yTr, XVa);
-        idxTr = ones(size(XTr, 1), 1);
-        idxVa = ones(size(XVa, 1), 1);
+        [idxTr, idxVa] = autoClustering(XTr, yTr, XVa);
     end
     
     % Display clusterized data
@@ -40,7 +72,7 @@ function magellan()
     
     % Remove (or not) outliers
     if (filterOutliersFlag)
-        [XTr, yTr] = filterOutliers(XTr, yTr, idxTr);
+        [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr);
     end
 
     % Collect predictions
@@ -112,11 +144,55 @@ function [idxTr, idxVa] = manualClustering(XTr, yTr, XVa)
 end
 
 function [idxTr, idxVa] = autoClustering(XTr, yTr, XVa)
-    assert(false, 'not yet implemented');
+    XTr = [ XTr(:, 25) XTr(:, 62) ];
+    XVa = [ XVa(:, 25) XVa(:, 62) ];
+
+    % Clusterize data
+    K = 3;
+    C = [ 12, 12, 1800 ; 12, 18, 5000 ; 17, 18, 8000 ];
+    idxTr = kmeans([XTr yTr], K, 'MaxIter', 1000, 'Start', C);
+
+    % Print result
+    mus = zeros(K, 2);
+    sigmas = zeros(K, 2);
+    for k = 1:K
+        kMu25 = mean(XTr(idxTr == k, 1));
+        kMu62 = mean(XTr(idxTr == k, 2));
+
+        kStd25 = std(XTr(idxTr == k, 1));
+        kStd62 = std(XTr(idxTr == k, 2));
+
+        mus(k, :) = [ kMu25 , kMu62 ];
+        sigmas(k, :) = [ kStd25 , kStd62 ];
+    end
+
+    % Compute probabilites of being in a cluster
+    global pVa;
+    pVa = zeros(size(XVa, 1), K);
+    for k = 1:K
+        pVa(:, k) = mvnpdf(XVa, mus(k, :), sigmas(k, :));
+    end
+
+    [~, idxVa] = max(pVa, [], 2);
 end
 
-function [XTr, yTr] = filterOutliers(XTr, yTr, idxTr)
-    assert(false, 'not yet implemented');
+function [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr)
+
+    % Remove Y-outliers
+    STD = 2; % keep 95%
+    for k = 1:3
+        kSigma = std(yTr(idxTr == k));
+        kMu = mean(yTr(idxTr == k));
+
+        idx = abs(yTr(idxTr == k) - kMu) >= STD * kSigma;
+
+        dels = length(find(idx));
+%         disp(dels);
+
+        XTr(idx, :) = [];
+        yTr(idx, :) = [];
+        idxTr(idx) = [];
+    end
 end
 
 function [XTr, XVa] = normalizeBoth(XTr, XVa)
