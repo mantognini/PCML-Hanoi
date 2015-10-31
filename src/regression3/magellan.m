@@ -1,29 +1,35 @@
 function magellan()
     % A better explorator than Polo (hopefully)
+    
+    doBoxplot();
+end
+
+function doBoxplot()
 
     methods = {
         % method, manual cluster, remove outliers, name %
+        { @overallMeanMethod, true, false, 'overall mean' },
         { @meanMethod, true, false, 'mean' },
         { @GDLSMethod, true, false, 'GDLS' },
 %         { @GDLSMethod, true, true, 'GDLS - outliers' },
 %         { @GDLSMethod, false, false, 'GDLS - auto' },
 %         { @GDLSMethod, false, true, 'GDLS - auto - outliers' },
-%         { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
+        { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
 %         { @linearRidgeKFoldMethod, true, true, 'linear rigde - outliers' },
 %         { @linearRidgeKFoldMethod, false, false, 'linear rigde - auto' },
 %         { @linearRidgeKFoldMethod, false, true, 'linear rigde - auto - outliers' },
-%         { @emplifiedRidgeKFoldMethod, true, false, 'emplified ridge' },
+        { @emplifiedRidgeKFoldMethod, true, false, 'emplified ridge' },
 %         { @emplifiedRidgeKFoldMethod, true, true, 'emplified ridge - outliers' },
 %         { @emplifiedRidgeKFoldMethod, false, false, 'emplified ridge - auto' },
 %         { @emplifiedRidgeKFoldMethod, false, true, 'emplified ridge - auto -outliers' },
-%         { @finalMethod, true, false, 'phis' },
+        { @finalMethod, true, false, 'phis' },
 %         { @finalMethod, true, true, 'phis - outliers' },
 %         { @finalMethod, false, false, 'phis - auto' },
 %         { @finalMethod, false, true, 'phis - auto - outliers' },
     };
 
     M = numel(methods);
-    S = 1;
+    S = 3;
     global rmse; % keep it alive between runs
     rmse = zeros(S, M);
     for s = 1:S
@@ -35,6 +41,9 @@ function magellan()
     figure;
     boxplot(rmse, 1:M);
     methodNames = cellfun(@(x) x{4}, methods, 'UniformOutput', false);
+    for i = 1:M
+        methodNames{i} = [num2str(i) ' ' methodNames{i}];
+    end
     legend(findobj(gca,'Tag','Box'), methodNames);
     xlabel('methods');
     ylabel('RMSE');
@@ -43,10 +52,13 @@ end
 
 function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
     % SETTINGS
-    %splitSeed = 42;
     splitRatio = 0.7;
-    displayClustersFlag = false;%true;
-    displayResultsFlag = false;%true;
+    
+%     displayClustersFlag = true;
+%     displayResultsFlag = true;
+
+    displayClustersFlag = false;
+    displayResultsFlag = false;
 
     [X_train, y_train, ~] = loadData();
     
@@ -55,11 +67,8 @@ function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
     [XTr, yTr, XVa, yVa] = doSplit(y_train, X_train, splitRatio);
     
     % Clusterize data
-    if (clusterManuallyFlag)
-        [idxTr, idxVa] = manualClustering(XTr, yTr, XVa);
-    else
-        [idxTr, idxVa] = autoClustering(XTr, yTr, XVa);
-    end
+    XTe = XVa; % just a trick for clusterize
+    [idxTr, idxVa, ~] = clusterize(clusterManuallyFlag, XTr, yTr, XVa, XTe);
     
     % Display clusterized data
     if (displayClustersFlag)
@@ -68,6 +77,9 @@ function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
         displayData(XTr, yTr, 25, 62, idxTr, 'training');
         subplot(1, 2, 2);
         displayData(XVa, yVa, 25, 62, idxVa, 'validation');
+        
+        figure('Name', 'Histogram of response');
+        displayYHistogram(yTr, idxTr, 'training');
     end
     
     % Remove (or not) outliers
@@ -107,6 +119,16 @@ function [X_train, y_train, X_test] = loadData()
     load('HaNoi_regression.mat');
 end
 
+function displayYHistogram(y, idx, name)
+    for k = 1:3
+        histogram(y(idx == k), 50);
+        hold on;
+    end
+    xlabel('response');
+    ylabel('count');
+    title(name);
+end
+
 function [ps] = displayData(X, y, f1, f2, idx, name)
     % Assume figure/subplot setup
     for k = 1:3
@@ -120,60 +142,6 @@ function [ps] = displayData(X, y, f1, f2, idx, name)
     title(name);
     grid on;
 %     axis square;
-end
-
-function [idx] = manualClustering_impl(X)
-    % Apply manual splitting of the identified three input sources
-    % Use feature 25 and 62 for that.
-    lim62 = 15.75;
-    lim25 = 15.25;
-
-    X25 = X(:, 25);
-    X62 = X(:, 62);
-
-    idx62 = X62 >= lim62;
-    idx25 = X25 < lim25;
-
-    % Indexes range over 1, 2 and 3
-    idx = idx62 + (idx25 & idx62) + 1;
-end
-
-function [idxTr, idxVa] = manualClustering(XTr, yTr, XVa)
-   idxTr = manualClustering_impl(XTr);
-   idxVa = manualClustering_impl(XVa);
-end
-
-function [idxTr, idxVa] = autoClustering(XTr, yTr, XVa)
-    XTr = [ XTr(:, 25) XTr(:, 62) ];
-    XVa = [ XVa(:, 25) XVa(:, 62) ];
-
-    % Clusterize data
-    K = 3;
-    C = [ 12, 12, 1800 ; 12, 18, 5000 ; 17, 18, 8000 ];
-    idxTr = kmeans([XTr yTr], K, 'MaxIter', 1000, 'Start', C);
-
-    % Print result
-    mus = zeros(K, 2);
-    sigmas = zeros(K, 2);
-    for k = 1:K
-        kMu25 = mean(XTr(idxTr == k, 1));
-        kMu62 = mean(XTr(idxTr == k, 2));
-
-        kStd25 = std(XTr(idxTr == k, 1));
-        kStd62 = std(XTr(idxTr == k, 2));
-
-        mus(k, :) = [ kMu25 , kMu62 ];
-        sigmas(k, :) = [ kStd25 , kStd62 ];
-    end
-
-    % Compute probabilites of being in a cluster
-    global pVa;
-    pVa = zeros(size(XVa, 1), K);
-    for k = 1:K
-        pVa(:, k) = mvnpdf(XVa, mus(k, :), sigmas(k, :));
-    end
-
-    [~, idxVa] = max(pVa, [], 2);
 end
 
 function [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr)
@@ -223,16 +191,21 @@ function [yVaPred] = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa)
         kyTr = yTr(idxTr == k, :);
         kXVa = XVa(idxVa == k, :);
         
-        yVaPred(idxVa == k) = method(kXTr, kyTr, kXVa, k);
+        yVaPred(idxVa == k) = method(kXTr, kyTr, kXVa, k, XTr, yTr);
     end
 end
 
-function [kyVaPred] = meanMethod(~, kyTr, kXVa, ~)
+function [kyVaPred] = overallMeanMethod(~, ~, kXVa, ~, ~, yTr)
+    overallMean = mean(yTr);
+    kyVaPred = ones(size(kXVa, 1), 1) * overallMean;
+end
+
+function [kyVaPred] = meanMethod(~, kyTr, kXVa, ~, ~, ~)
     clusterMean = mean(kyTr);
     kyVaPred = ones(size(kXVa, 1), 1) * clusterMean;
 end
 
-function [kyVaPred] = GDLSMethod(kXTr, kyTr, kXVa, ~)
+function [kyVaPred] = GDLSMethod(kXTr, kyTr, kXVa, ~, ~, ~)
     kNTr = size(kXTr, 1);
     kNVa = size(kXVa, 1);
 
@@ -245,13 +218,13 @@ function [kyVaPred] = GDLSMethod(kXTr, kyTr, kXVa, ~)
     kyVaPred = ktXVa * kBeta;
 end
 
-function [kyVaPred] = linearRidgeKFoldMethod(kXTr, kyTr, kXVa, ~)
+function [kyVaPred] = linearRidgeKFoldMethod(kXTr, kyTr, kXVa, ~, ~, ~)
     K = 10;
     kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
 end
 
-function [kyVaPred] = emplifiedRidgeKFoldMethod(kXTr, kyTr, kXVa, k)
-    K = 5;
+function [kyVaPred] = emplifiedRidgeKFoldMethod(kXTr, kyTr, kXVa, k, ~, ~)
+    K = 10;
     if k == 1
         kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
@@ -261,16 +234,8 @@ function [kyVaPred] = emplifiedRidgeKFoldMethod(kXTr, kyTr, kXVa, k)
     end
 end
 
-function [kyVaPred] = finalMethod(kXTr, kyTr, kXVa, k)
-    fm = FinalMethod(false, true);
-    D = size(kXTr, 2);
-    kPhis = fm.buildPhis(D, k);
-    ktXTr = fm.map(kPhis, kXTr);
-    ktXVa = fm.map(kPhis, kXVa);
-    
-    K = 10;
-    kLambda = bestLambdaKFold(kyTr, ktXTr, K);
-    kBeta = ridgeRegression(kyTr, ktXTr, kLambda);
-    
-    kyVaPred = ktXVa * kBeta;
+function [kyVaPred] = finalMethod(kXTr, kyTr, kXVa, k, ~, ~)
+    kXTe = kXVa; % just a trick for finalMethod_impl
+    [~, kyVaPred, ~] = finalMethod_impl(kXTr, kyTr, kXVa, kXTe, k);
 end
+
