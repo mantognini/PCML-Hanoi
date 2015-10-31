@@ -16,13 +16,13 @@ function learningCurve()
     % Given the best learners for regression, compute rmse
     
     % initial parameters
-    ratios = 0.6:0.05:0.9;%.6:.025:0.9;
+    ratios = 0.6:0.025:0.9;
     seeds = 20;
     
     % define method
 %     method = @linearRidgeKFoldMethod;
-    method = @emplifiedRidgeKFoldMethod2;
-%     method = @finalMethod;
+%     method = @emplifiedRidgeKFoldMethod2;
+    method = @finalMethod;
     
     % Compute
     validRMSE = zeros(length(seeds), length(ratios));
@@ -55,7 +55,7 @@ function lambdaPlot()
     degrees = 1:6;
     clusterManuallyFlag = true;
     clusters = 1:3;
-    S = 1; % if 1 -> lambda curves, otherwise boxplot
+    S = 20; % if 1 -> lambda curves, otherwise boxplot
     
     if S > 1
         lambdas = logspace(-5, 12, 20); % not too many point here
@@ -65,8 +65,11 @@ function lambdaPlot()
     
     for cluster = clusters
         kmseTe = zeros(length(degrees), S, length(lambdas));
+        fprintf(['cluster ' num2str(cluster) ':\n']);
         for s = 1:S
+            fprintf(['\tseed ' num2str(s, '%02.0f') ' ']);
             for d = degrees
+                fprintf('.');
                 [XTr, yTr, ~] = loadData();
                 XVa = XTr; % just a trick for clusterize
                 XTe = XTr; % just a trick for clusterize
@@ -130,15 +133,16 @@ function lambdaPlot()
                 legend(arrayfun(@num2str, degrees'));
             end
         end % s
+        fprintf('\n');
 
         if S > 1
             figure('Name', ['cluster ' num2str(cluster) ': lambda/test rmse']);
-            colors = [ 'r' 'b' 'k' 'm' 'c' 'y' ]';
+            colors = colormap(lines(length(degrees)));
             aboxplot(kmseTe, 'Colormap', colors);
             xlabel('lambda');
             ylabel('Test RMSE');
             title(['cluster ' num2str(cluster)]);
-            legend(arrayfun(@num2str, degrees'));
+            legend(arrayfun(@num2str, degrees'), 'location', 'northwest');
             set(gca, 'XTickLabel', lambdas);
         end
     end
