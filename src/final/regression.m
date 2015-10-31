@@ -1,36 +1,31 @@
 % Given the best learners for regression, compute rmse
 clear all;
 load('HaNoi_regression.mat');
-data.train.X = X_train;
-data.train.y = y_train;
-data.test.X  = X_test;
 
 % initial parameters
-S = 10;
+FinalSeed = 59283;
 splitRatio = 0.7;
 
 % define method
-obj = FinalMethod(true, true);
-method = @obj.apply;
-
+method = @finalMethod;
 
 % A final seed
-setSeed(S);
+setSeed(FinalSeed);
 
 % Split data into training and validation sets
-N = size(data.train.X, 1);
+N = size(X_train, 1);
 idx = randperm(N);
-X = data.train.X(idx, :);
-y = data.train.y(idx);
+X = X_train(idx, :);
+y = y_train(idx);
 [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
 
 % Collect predictions
-[yValidPred, yTestPred] = method(XTr, yTr, XValid, data.test.X);
+[yValidPred, yTestPred, testRMSE] = method(XTr, yTr, XValid, X_test);
 
-% Compute error for this cluster
+% Compute rmse
 e = computeRmse(yValidPred - yValid);
+fprintf(['Final rmse: ' num2str(e)]);
 
-display(e, 'rmse');
-
-% todo: save yTestPred
+% save yTestPred
+csvwrite('predictions_regression.csv', yTestPred);
 
