@@ -30,17 +30,10 @@ for ratio = ratios
     end
 end
 
-% todo: plot
-%%
 figure('Name', 'Learning curve');
-boxplot(validRMSE, 'color', 'b', 'plotstyle', 'compact', 'labels', ratios);
-% legend(findobj(gca,'Tag','Box'), 'valid');
-%legend('valid');
-hold on;
-boxplot(trainRMSE, 'color', 'r', 'plotstyle', 'compact', 'labels', ratios);
-% legend(findobj(gca,'Tag','Box'), 'train');
-% legend(findobj(gca,'Tag','Box'), 'train', 'valid');
+rmse = reshape([validRMSE; trainRMSE], 2, length(seeds), length(ratios));
+aboxplot(rmse, 'labels', ratios, 'colorgrad', 'orange_down');
 xlabel('Training set size');
 ylabel('RMSE');
-ylim([200 800]);
-
+legend('train', 'valid');
+title(['Learning curve for ' func2str(method)]);
