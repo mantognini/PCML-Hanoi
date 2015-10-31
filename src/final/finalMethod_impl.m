@@ -26,11 +26,11 @@ function phis = buildPhis(D, k)
     for d = 1:D
         if k == 1
 %             p = p + 1; phis{p} = @(x) sign(x(d)) * power(1/2, sign(x(d)) * x(d));
-            p = p + 1; phis{p} = @(x) power(1, x(d));
+%             p = p + 1; phis{p} = @(x) power(1, x(d));
             p = p + 1; phis{p} = @(x) power(2, x(d));
             p = p + 1; phis{p} = @(x) power(3, x(d));
-            p = p + 1; phis{p} = @(x) power(4, x(d));
-            p = p + 1; phis{p} = @(x) power(5, x(d));
+%             p = p + 1; phis{p} = @(x) power(4, x(d));
+%             p = p + 1; phis{p} = @(x) power(5, x(d));
 %             p = p + 1; phis{p} = @(x) sigmoid(x(d));
         end
 
@@ -38,9 +38,9 @@ function phis = buildPhis(D, k)
 %             p = p + 1; phis{p} = @(x) sign(x(d)) * power(1/2, sign(x(d)) * x(d));
 %             p = p + 1; phis{p} = @(x) power(1, x(d));
 %             p = p + 1; phis{p} = @(x) power(2, x(d));
-%             p = p + 1; phis{p} = @(x) power(3, x(d));
-            p = p + 1; phis{p} = @(x) power(4, x(d));
-            p = p + 1; phis{p} = @(x) power(5, x(d));
+            p = p + 1; phis{p} = @(x) power(3, x(d));
+%             p = p + 1; phis{p} = @(x) power(4, x(d));
+%             p = p + 1; phis{p} = @(x) power(5, x(d));
 %             p = p + 1; phis{p} = @(x) power(6, x(d));
 %             p = p + 1; phis{p} = @(x) sigmoid(x(d));
 %             p = p + 1; phis{p} = @(x) tanh(x(d));
@@ -48,8 +48,9 @@ function phis = buildPhis(D, k)
 
         if k == 3
 %             p = p + 1; phis{p} = @(x) sign(x(d)) * power(1/2, sign(x(d)) * x(d));
-            p = p + 1; phis{p} = @(x) power(1, x(d));
-            p = p + 1; phis{p} = @(x) power(3, x(d));
+%             p = p + 1; phis{p} = @(x) power(1, x(d));
+            p = p + 1; phis{p} = @(x) power(2, x(d));
+%             p = p + 1; phis{p} = @(x) power(3, x(d));
 %             p = p + 1; phis{p} = @(x) power(5, x(d));
         end
     end

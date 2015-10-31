@@ -1,7 +1,105 @@
-function magellan()
+function magellan(arg)
     % A better explorator than Polo (hopefully)
     
-    doBoxplot();
+    if strcmp(arg, 'box')
+        doBoxplot();
+    else
+        lambdaPlot();
+    end
+end
+
+function lambdaPlot()
+    K = 10;
+    degrees = 1:6;
+    clusterManuallyFlag = true;
+    clusters = 1:3;
+    S = 1; % if 1 -> lambda curves, otherwise boxplot
+    
+    if S > 1
+        lambdas = logspace(-5, 12, 20); % not too many point here
+    else
+        lambdas = logspace(-5, 12, 100);
+    end
+    
+    for cluster = clusters
+        kmseTe = zeros(length(degrees), S, length(lambdas));
+        for s = 1:S
+            for d = degrees
+                [XTr, yTr, ~] = loadData();
+                XVa = XTr; % just a trick for clusterize
+                XTe = XTr; % just a trick for clusterize
+                [idxTr, ~, ~] = clusterize(clusterManuallyFlag, XTr, yTr, XVa, XTe);
+                clear XVa XTe;
+                
+                %removeCategorical(XTr);
+                XTr(:, [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61]) = [];
+                [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr);
+                
+                kXTr = XTr(idxTr == cluster, :);
+                kyTr = yTr(idxTr == cluster, :);
+                
+                kN = length(kyTr);
+                ktXTr = [ones(kN, 1) polynomialPhi(kXTr, d)];
+                
+                % Compute K-Fold CV indices
+                idx = randperm(kN);
+                Nk = floor(kN / K);
+                D = size(ktXTr, 2) - 1;
+                
+                N_train = Nk * (K - 1);
+                assert(N_train >= D, ['Problem N_train < D: N_train = ' num2str(N_train) ', D = ' num2str(D)]);
+                
+                clear idxCV;
+                for k = 1:K
+                    idxCV(k,:) = idx(1+(k-1)*Nk:k*Nk);
+                end
+                
+                % K-fold cross validation
+                kmseTeSub = zeros(1, K);
+                for l = 1:length(lambdas)
+                    kLambda = lambdas(l);
+                    
+                    for k = 1:K
+                        % get k'th subgroup in test, others in train
+                        idxTe = idxCV(k,:);
+                        idxTr = idxCV([1:k-1 k+1:end],:);
+                        idxTr = idxTr(:);
+                        yTe = kyTr(idxTe);
+                        tXTe = ktXTr(idxTe,:);
+                        yTr = kyTr(idxTr);
+                        tXTr = ktXTr(idxTr,:);
+                        
+                        % find beta & compute rmse
+                        beta = ridgeRegression(yTr, tXTr, kLambda);
+                        kmseTeSub(k) = computeRmse(yTe - tXTe * beta);
+                    end
+                    
+                    kmseTe(d, s, l) = mean(kmseTeSub);
+                end
+            end % degree
+
+            if S == 1
+                figure('Name', ['cluster ' num2str(cluster) ': lambda/test rmse']);
+                kmseTe = reshape(kmseTe, length(degrees), length(lambdas));
+                semilogx(lambdas, kmseTe, '-', 'LineWidth', 4);
+                xlabel('lambda');
+                ylabel('Test RMSE');
+                title(['cluster ' num2str(cluster)]);
+                legend(arrayfun(@num2str, degrees'));
+            end
+        end % s
+
+        if S > 1
+            figure('Name', ['cluster ' num2str(cluster) ': lambda/test rmse']);
+            colors = [ 'r' 'b' 'k' 'm' 'c' 'y' ]';
+            aboxplot(kmseTe, 'Colormap', colors);
+            xlabel('lambda');
+            ylabel('Test RMSE');
+            title(['cluster ' num2str(cluster)]);
+            legend(arrayfun(@num2str, degrees'));
+            set(gca, 'XTickLabel', lambdas);
+        end
+    end
 end
 
 function doBoxplot()
@@ -18,24 +116,31 @@ function doBoxplot()
 %         { @linearRidgeKFoldMethod, true, true, 'linear rigde - outliers' },
 %         { @linearRidgeKFoldMethod, false, false, 'linear rigde - auto' },
 %         { @linearRidgeKFoldMethod, false, true, 'linear rigde - auto - outliers' },
-        { @emplifiedRidgeKFoldMethod, true, false, 'emplified ridge' },
+        { @emplifiedRidgeKFoldMethod1, true, false, 'emplified ridge 1' },
+        { @emplifiedRidgeKFoldMethod2, true, false, 'emplified ridge 2' },
+        { @emplifiedRidgeKFoldMethod2, true, true, 'emplified ridge 2 - outliers' },
+        { @emplifiedRidgeKFoldMethod3, true, false, 'emplified ridge 3' },
+        { @emplifiedRidgeKFoldMethod4, true, false, 'emplified ridge 4' },
 %         { @emplifiedRidgeKFoldMethod, true, true, 'emplified ridge - outliers' },
 %         { @emplifiedRidgeKFoldMethod, false, false, 'emplified ridge - auto' },
 %         { @emplifiedRidgeKFoldMethod, false, true, 'emplified ridge - auto -outliers' },
         { @finalMethod, true, false, 'phis' },
-%         { @finalMethod, true, true, 'phis - outliers' },
+        { @finalMethod, true, true, 'phis - outliers' },
 %         { @finalMethod, false, false, 'phis - auto' },
 %         { @finalMethod, false, true, 'phis - auto - outliers' },
     };
 
     M = numel(methods);
-    S = 3;
+    S = 20;
     global rmse; % keep it alive between runs
     rmse = zeros(S, M);
     for s = 1:S
+        fprintf(['seed ' num2str(s, '%02.0f') ' ']);
         for m = 1:M
+            fprintf('.');
             rmse(s, m) = runMethod(methods{m}{1}, methods{m}{2}, methods{m}{3});
         end
+        fprintf('\n');
     end
     
     figure;
@@ -48,7 +153,6 @@ function doBoxplot()
     xlabel('methods');
     ylabel('RMSE');
 end
-
 
 function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
     % SETTINGS
@@ -90,11 +194,11 @@ function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
     % Collect predictions
     yVaPred = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa);
     rmse = computeRmse(yVaPred - yVa);
-    for k = 1:3
-        krmse(k) = computeRmse(yVaPred(idxVa == k) - yVa(idxVa == k));
-    end
-    fprintf(['method ' func2str(method) ' -> RMSE = ' num2str(rmse) '\n']);
-    fprintf(['RMSE per cluster: ' num2str(krmse) '\n']);
+%     for k = 1:3
+%         krmse(k) = computeRmse(yVaPred(idxVa == k) - yVa(idxVa == k));
+%     end
+%     fprintf(['method ' func2str(method) ' -> RMSE = ' num2str(rmse) '\n']);
+%     fprintf(['RMSE per cluster: ' num2str(krmse) '\n']);
 
     if (displayResultsFlag)
         figure('Name', 'Prediction on validation set');
@@ -223,14 +327,47 @@ function [kyVaPred] = linearRidgeKFoldMethod(kXTr, kyTr, kXVa, ~, ~, ~)
     kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
 end
 
-function [kyVaPred] = emplifiedRidgeKFoldMethod(kXTr, kyTr, kXVa, k, ~, ~)
+function [kyVaPred] = emplifiedRidgeKFoldMethod1(kXTr, kyTr, kXVa, k, ~, ~)
     K = 10;
     if k == 1
         kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 4);
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    elseif k == 3
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
+    end
+end
+
+function [kyVaPred] = emplifiedRidgeKFoldMethod2(kXTr, kyTr, kXVa, k, ~, ~)
+    K = 10;
+    if k == 1
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    elseif k == 2
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    elseif k == 3
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 2);
+    end
+end
+
+function [kyVaPred] = emplifiedRidgeKFoldMethod3(kXTr, kyTr, kXVa, k, ~, ~)
+    K = 10;
+    if k == 1
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    elseif k == 2
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 3
         kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    end
+end
+
+function [kyVaPred] = emplifiedRidgeKFoldMethod4(kXTr, kyTr, kXVa, k, ~, ~)
+    K = 10;
+    if k == 1
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    elseif k == 2
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+    elseif k == 3
+        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 4);
     end
 end
 
