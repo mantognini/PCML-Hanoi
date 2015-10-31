@@ -3,9 +3,51 @@ function magellan(arg)
     
     if strcmp(arg, 'box')
         doBoxplot();
-    else
+    elseif strcmp(arg, 'lambda')
         lambdaPlot();
+    elseif strcmp(arg, 'learning')
+        learningCurve();
+    else
+        fprintf('Unknown argument\n');
     end
+end
+
+function learningCurve()
+    % Given the best learners for regression, compute rmse
+    
+    % initial parameters
+    ratios = 0.6:0.05:0.9;%.6:.025:0.9;
+    seeds = 20;
+    
+    % define method
+%     method = @linearRidgeKFoldMethod;
+    method = @emplifiedRidgeKFoldMethod2;
+%     method = @finalMethod;
+    
+    % Compute
+    validRMSE = zeros(length(seeds), length(ratios));
+    trainRMSE = zeros(length(seeds), length(ratios));
+    for r = 1:length(ratios)
+        ratio = ratios(r);
+        
+        fprintf(['Ratio ' num2str(r) 'th ']);
+        
+        for s = 1:seeds
+            fprintf('.');
+            [rmseTr, rmseVa] = runMethod(method, true, false, ratio);
+            validRMSE(s, r) = rmseVa;
+            trainRMSE(s, r) = rmseTr;
+        end
+        fprintf('\n');
+    end
+    
+    figure('Name', 'Learning curve');
+    rmse = reshape([validRMSE; trainRMSE], 2, seeds, length(ratios));
+    aboxplot(rmse, 'labels', ratios, 'colorgrad', 'orange_down');
+    xlabel('Training set size');
+    ylabel('RMSE');
+    legend('train', 'valid');
+    title(['Learning curve for ' func2str(method)]);
 end
 
 function lambdaPlot()
@@ -132,13 +174,14 @@ function doBoxplot()
 
     M = numel(methods);
     S = 20;
-    global rmse; % keep it alive between runs
+    splitRatio = 0.7;
+    
     rmse = zeros(S, M);
     for s = 1:S
         fprintf(['seed ' num2str(s, '%02.0f') ' ']);
         for m = 1:M
             fprintf('.');
-            rmse(s, m) = runMethod(methods{m}{1}, methods{m}{2}, methods{m}{3});
+            [rmse(s, m), ~] = runMethod(methods{m}{1}, methods{m}{2}, methods{m}{3}, splitRatio);
         end
         fprintf('\n');
     end
@@ -154,13 +197,10 @@ function doBoxplot()
     ylabel('RMSE');
 end
 
-function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
+function [rmseTr, rmseVa] = runMethod(method, clusterManuallyFlag, filterOutliersFlag, splitRatio)
     % SETTINGS
-    splitRatio = 0.7;
-    
 %     displayClustersFlag = true;
 %     displayResultsFlag = true;
-
     displayClustersFlag = false;
     displayResultsFlag = false;
 
@@ -192,8 +232,9 @@ function [rmse] = runMethod(method, clusterManuallyFlag, filterOutliersFlag)
     end
 
     % Collect predictions
-    yVaPred = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa);
-    rmse = computeRmse(yVaPred - yVa);
+    [yTrPred, yVaPred] = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa);
+    rmseTr = computeRmse(yTrPred - yTr);
+    rmseVa = computeRmse(yVaPred - yVa);
 %     for k = 1:3
 %         krmse(k) = computeRmse(yVaPred(idxVa == k) - yVa(idxVa == k));
 %     end
@@ -258,7 +299,7 @@ function [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr)
 
         idx = abs(yTr(idxTr == k) - kMu) >= STD * kSigma;
 
-        dels = length(find(idx));
+%         dels = length(find(idx));
 %         disp(dels);
 
         XTr(idx, :) = [];
@@ -287,7 +328,8 @@ function [XTr, XVa] = normalizeBoth(XTr, XVa)
     end
 end
 
-function [yVaPred] = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa)
+function [yTrPred, yVaPred] = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa)
+    yTrPred = zeros(size(XTr, 1), 1);
     yVaPred = zeros(size(XVa, 1), 1);
     
     for k = 1:3
@@ -295,21 +337,26 @@ function [yVaPred] = applyMethodOnClusters(method, XTr, yTr, XVa, idxTr, idxVa)
         kyTr = yTr(idxTr == k, :);
         kXVa = XVa(idxVa == k, :);
         
-        yVaPred(idxVa == k) = method(kXTr, kyTr, kXVa, k, XTr, yTr);
+        [kyTrPred, kyVaPred] = method(kXTr, kyTr, kXVa, k, XTr, yTr);
+        
+        yTrPred(idxTr == k) = kyTrPred;
+        yVaPred(idxVa == k) = kyVaPred;
     end
 end
 
-function [kyVaPred] = overallMeanMethod(~, ~, kXVa, ~, ~, yTr)
+function [kyTrPred, kyVaPred] = overallMeanMethod(kXTr, ~, kXVa, ~, ~, yTr)
     overallMean = mean(yTr);
+    kyTrPred = ones(size(kXTr, 1), 1) * overallMean;
     kyVaPred = ones(size(kXVa, 1), 1) * overallMean;
 end
 
-function [kyVaPred] = meanMethod(~, kyTr, kXVa, ~, ~, ~)
+function [kyTrPred, kyVaPred] = meanMethod(kXTr, kyTr, kXVa, ~, ~, ~)
     clusterMean = mean(kyTr);
+    kyTrPred = ones(size(kXTr, 1), 1) * clusterMean;
     kyVaPred = ones(size(kXVa, 1), 1) * clusterMean;
 end
 
-function [kyVaPred] = GDLSMethod(kXTr, kyTr, kXVa, ~, ~, ~)
+function [kyTrPred, kyVaPred] = GDLSMethod(kXTr, kyTr, kXVa, ~, ~, ~)
     kNTr = size(kXTr, 1);
     kNVa = size(kXVa, 1);
 
@@ -317,62 +364,63 @@ function [kyVaPred] = GDLSMethod(kXTr, kyTr, kXVa, ~, ~, ~)
 
     ktXTr = [ones(kNTr, 1) kXTr];
     kBeta = leastSquaresGDLS(kyTr, ktXTr);
+    kyTrPred = ktXTr * kBeta;
 
     ktXVa = [ones(kNVa, 1) kXVa];
     kyVaPred = ktXVa * kBeta;
 end
 
-function [kyVaPred] = linearRidgeKFoldMethod(kXTr, kyTr, kXVa, ~, ~, ~)
+function [kyTrPred, kyVaPred] = linearRidgeKFoldMethod(kXTr, kyTr, kXVa, ~, ~, ~)
     K = 10;
-    kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
+    [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
 end
 
-function [kyVaPred] = emplifiedRidgeKFoldMethod1(kXTr, kyTr, kXVa, k, ~, ~)
+function [kyTrPred, kyVaPred] = emplifiedRidgeKFoldMethod1(kXTr, kyTr, kXVa, k, ~, ~)
     K = 10;
     if k == 1
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 3
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 1);
     end
 end
 
-function [kyVaPred] = emplifiedRidgeKFoldMethod2(kXTr, kyTr, kXVa, k, ~, ~)
+function [kyTrPred, kyVaPred] = emplifiedRidgeKFoldMethod2(kXTr, kyTr, kXVa, k, ~, ~)
     K = 10;
     if k == 1
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 3
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 2);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 2);
     end
 end
 
-function [kyVaPred] = emplifiedRidgeKFoldMethod3(kXTr, kyTr, kXVa, k, ~, ~)
+function [kyTrPred, kyVaPred] = emplifiedRidgeKFoldMethod3(kXTr, kyTr, kXVa, k, ~, ~)
     K = 10;
     if k == 1
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 3
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     end
 end
 
-function [kyVaPred] = emplifiedRidgeKFoldMethod4(kXTr, kyTr, kXVa, k, ~, ~)
+function [kyTrPred, kyVaPred] = emplifiedRidgeKFoldMethod4(kXTr, kyTr, kXVa, k, ~, ~)
     K = 10;
     if k == 1
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 2
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 3);
     elseif k == 3
-        kyVaPred = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 4);
+        [kyTrPred, kyVaPred] = predictRidgeKFold(kXTr, kyTr, kXVa, K, @polynomialPhi, 4);
     end
 end
 
-function [kyVaPred] = finalMethod(kXTr, kyTr, kXVa, k, ~, ~)
+function [kyTrPred, kyVaPred] = finalMethod(kXTr, kyTr, kXVa, k, ~, ~)
     kXTe = kXVa; % just a trick for finalMethod_impl
-    [~, kyVaPred, ~] = finalMethod_impl(kXTr, kyTr, kXVa, kXTe, k);
+    [kyTrPred, kyVaPred, ~] = finalMethod_impl(kXTr, kyTr, kXVa, kXTe, k);
 end
 

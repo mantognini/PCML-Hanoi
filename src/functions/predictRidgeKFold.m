@@ -1,4 +1,4 @@
-function yValidPred = predictRidgeKFold(XTr, yTr, XValid, K, phi, d)
+function [yTrPred, yValidPred] = predictRidgeKFold(XTr, yTr, XValid, K, phi, d)
 % predictRidgeKFold(XTr, yTr, XValid, K, phi)
 %   Predict using ridge regression with phi function applied to each feature
 %   giving it the d parameter (d = 1(linear?), 2(square), etc..).
@@ -13,6 +13,7 @@ function yValidPred = predictRidgeKFold(XTr, yTr, XValid, K, phi, d)
     
     lambda = bestLambdaKFold(yTr, tXTr, min(K, N));
     beta = ridgeRegression(yTr, tXTr, lambda);
+    yTrPred = tXTr * beta;
     %disp(beta);
     
     NValid = size(XValid, 1);
