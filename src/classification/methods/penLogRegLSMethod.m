@@ -3,8 +3,9 @@ function yValidPred = penLogRefLSMethod(XTr, yTr, XValid)
     % Compute model
     NTr = length(yTr);
     tXTr = [ones(NTr, 1) XTr];
-    % todo compute lambda
-    lambda = 0;
+    K = 10;
+    lambda = bestLambdaPenLog(yTr, tXTr, K);
+    fprintf(['penLog lambda: ' num2str(lambda) ', K = ' num2str(K) '\n']);
     beta = penLogRegLS(yTr, tXTr, lambda);
     
     % Predict

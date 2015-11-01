@@ -6,7 +6,7 @@ function [ H ] = penLogRegHessian(tX, beta, lambda)
     
     % beta0 is not penalized
     penMatrix = diag(beta);
-    penMatrix(1) = 0;
+    penMatrix(1, 1) = 0;
     
     % compute the hessian
     s = sigma(tX * beta);

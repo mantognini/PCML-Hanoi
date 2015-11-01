@@ -14,17 +14,26 @@ strategies = {
         @noFilter,
         % method for the unique cluster
         {{
-%             {@dummyClassificationMethod, 'dummy'},
+            {@dummyClassificationMethod, 'dummy'},
 %             {@naiveClassificationMethod, 'naive'},
             {@logisticClassificationMethod, 'logReg'},
 %             {@logisticClassificationWithManualSplittingMethod, 'logReg+M'},
-            {@penLogRegLSMethod, 'penLogReg'},
+        }}
+    },
+    {
+        @noClusterSplitter,
+        @dummyAndNorm,
+        @noFilter,
+        % method for the unique cluster
+        {{
+            {@penLogRegLSMethod, 'PLR+encode+norm'},
         }}
     },
 };
 
 % Compute & plot misclassification for strategies
-
+finalPlotError = [];
+finalPlotLabels = {};
 for splitterNo = 1:numel(strategies)
     splitter = strategies{splitterNo}{1};
     featureTransformation = strategies{splitterNo}{2};
@@ -71,15 +80,18 @@ for splitterNo = 1:numel(strategies)
 
         end % seeds
         
-        % Plot RMSE for this cluster
-        figure('Name', ['Misclassification for ' func2str(splitter) ' + ' ...
-            func2str(featureTransformation) ' + ' func2str(filter)]);
-        boxplot(error, 'labels', labels);
-        title([num2str(k) 'th cluster']);
-        %xlabel('methods');
-        ylabel('misclassification');
+        % Plots data
+        finalPlotError = [finalPlotError error];
+        finalPlotLabels = [finalPlotLabels labels];
         
     end % clusters
     
+    
 end % splitter
+
+% Plots
+figure('Name', 'recap');
+boxplot(finalPlotError, 'labels', finalPlotLabels);
+xlabel('methods');
+ylabel('misclassification');
 
