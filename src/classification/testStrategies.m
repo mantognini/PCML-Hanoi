@@ -14,10 +14,11 @@ strategies = {
         @noFilter,
         % method for the unique cluster
         {{
-            @dummyClassificationMethod,
-            @naiveClassificationMethod,
-            @logisticClassificationMethod,
-            @logisticClassificationWithManualSplittingMethod,
+            {@dummyClassificationMethod, 'dummy'},
+            {@naiveClassificationMethod, 'naive'},
+%             {@logisticClassificationMethod, 'logReg'},
+%             {@logisticClassificationWithManualSplittingMethod, 'logReg+M'},
+%             {@penLogRegLSMethod, 'penLogReg'},
         }}
     },
 };
@@ -39,6 +40,7 @@ for splitterNo = 1:numel(strategies)
         error = zeros(seeds, numel(methods));
         
         N = size(cluster.train.X, 1);
+        labels = {};
     
         % Test each methods several times with different training and 
         % validation split of the data
@@ -57,7 +59,8 @@ for splitterNo = 1:numel(strategies)
             
             % Test each method
             for methodNo = 1:numel(methods)
-                method = methods{methodNo};
+                method = methods{methodNo}{1};
+                labels{methodNo} = methods{methodNo}{2};
                 
                 % Collect predictions
                 yValidPred = method(XTr, yTr, XValid);
@@ -72,7 +75,7 @@ for splitterNo = 1:numel(strategies)
         % Plot RMSE for this cluster
         figure('Name', ['Misclassification for ' func2str(splitter) ' + ' ...
             func2str(featureTransformation) ' + ' func2str(filter)]);
-        boxplot(error, 'labels', cellfun(@func2str, methods, 'UniformOutput', false));
+        boxplot(error, 'labels', labels);
         title([num2str(k) 'th cluster']);
         %xlabel('methods');
         ylabel('misclassification');
