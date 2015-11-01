@@ -1,5 +1,5 @@
-function [ g ] = penLogRegGradient(y, tX, beta, lambda)
-% penLogRegGradient(y, tX, beta, lambda)
+function [ g ] = PLRGradient(y, tX, beta, lambda)
+% PLRGradient(y, tX, beta, lambda)
 %   Compute the gradient for the penalized logistic regression.
 %   Formally, it is the gradient of the negative log-likelihood + the
 %   gradient of a penality term.

@@ -4,7 +4,7 @@ clear all;
 data = loadClassificationData();
 
 % Settings
-seeds = 20;         % number of seed to be tested
+seeds = 2;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 strategies = {
@@ -14,10 +14,8 @@ strategies = {
         @noFilter,
         % method for the unique cluster
         {{
-            {@dummyClassificationMethod, 'dummy'},
-%             {@naiveClassificationMethod, 'naive'},
-            {@logisticClassificationMethod, 'logReg'},
-%             {@logisticClassificationWithManualSplittingMethod, 'logReg+M'},
+            {@dummyMethod, 'dummy'},
+%             {@naiveMethod, 'naive'},
         }}
     },
     {
@@ -26,7 +24,10 @@ strategies = {
         @noFilter,
         % method for the unique cluster
         {{
-            {@penLogRegLSMethod, 'PLR+encode+norm'},
+            {@LRLSMethod, 'logReg'},
+            {@LRLSManualMethod, 'logReg+M'},
+            {@PLRLSMethod, 'PLRLS'},
+            {@PLRLSNewtonMethod, 'PLRLS+New'},
         }}
     },
 };
@@ -92,6 +93,5 @@ end % splitter
 % Plots
 figure('Name', 'recap');
 boxplot(finalPlotError, 'labels', finalPlotLabels);
-xlabel('methods');
-ylabel('misclassification');
+ylabel('0-1 Loss');
 

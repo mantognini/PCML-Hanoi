@@ -1,4 +1,6 @@
-function beta = penLogisticRegression(y,tX,lambda)
+function beta = PLRLS(y,tX,lambda)
+% penalized logistic regression with line search
+%
     % initialization
     [~, M] = size(tX);
     beta0 = zeros(M, 1); % aka beta0
@@ -7,7 +9,7 @@ function beta = penLogisticRegression(y,tX,lambda)
     
     % Newton's method is equivalent to gradient descent with a custom
     % gradient taking into account second-order information
-    customGradient = @(y, tX, beta) penLogRegHessian(tX, beta, lambda) \ penLogRegGradient(y, tX, beta, lambda);
+    customGradient = @(y, tX, beta) PLRGradient(y, tX, beta, lambda);
     beta = GDLS(y, tX, beta0, maxIters, precision, customGradient);
 end
 

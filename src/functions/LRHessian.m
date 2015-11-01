@@ -1,5 +1,5 @@
-function [ H ] = logisticRegHessian(tX, beta)
-% logisticRegHessian(tX, alpha)
+function [ H ] = LRHessian(tX, beta)
+% LRHessian(tX, alpha)
 %   Compute the Hessian for the logistic regression.
 %   Formally, it is the Hessian of the log-likelihood.
 %

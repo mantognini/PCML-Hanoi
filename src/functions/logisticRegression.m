@@ -1,6 +1,6 @@
 function beta = logisticRegression(y,tX,alpha)
 % logisticRegression(y,tX,alpha)
-%   Compute the logistic regression using Newton's method.
+%   Compute the logistic regression using Gradient Descent method.
 %
     % initialization
     [~, M] = size(tX);
@@ -8,9 +8,8 @@ function beta = logisticRegression(y,tX,alpha)
     precision = 1^(-10);
     maxIters = 100;
     
-    % Newton's method is equivalent to gradient descent with a custom
-    % gradient taking into account second-order information
-    customGradient = @(y, tX, beta) logisticRegHessian(tX, beta) \ logisticRegGradient(y, tX, beta);
+    % Gradient descent
+    customGradient = @(y, tX, beta) LRGradient(y, tX, beta);
     beta = gradientDescent(y, tX, beta0, alpha, maxIters, precision, customGradient);
 end
 

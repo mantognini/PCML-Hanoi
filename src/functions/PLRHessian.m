@@ -1,5 +1,5 @@
-function [ H ] = penLogRegHessian(tX, beta, lambda)
-% penLogRegHessian(tX, beta, lambda)
+function [ H ] = PLRHessian(tX, beta, lambda)
+% PLRHessian(tX, beta, lambda)
 %   Compute the hessian of the penalized logistic regression.
 %
     sigma = @(x) exp(x) ./ (1 + exp(x));

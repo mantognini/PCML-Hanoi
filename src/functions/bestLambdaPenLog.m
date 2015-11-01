@@ -35,7 +35,7 @@ function lambda = bestLambdaPenLog(y, tX, K)
             tXTr = tX(idxTr,:);
 
             % beta & predict
-            beta = penLogRegLS(yTr, tXTr, lambda);
+            beta = PLRLS(yTr, tXTr, lambda);
             mseTeSub(k) = logLoss(yTe, tXTe * beta);
             mseTrSub(k) = logLoss(yTr, tXTr * beta);
         end

@@ -1,12 +1,12 @@
-function yValidPred = penLogRefLSMethod(XTr, yTr, XValid)
+function yValidPred = PLRLSNewtonMethod(XTr, yTr, XValid)
 %
     % Compute model
     NTr = length(yTr);
     tXTr = [ones(NTr, 1) XTr];
-    K = 10;
+    K = 5;
     lambda = bestLambdaPenLog(yTr, tXTr, K);
-    fprintf(['penLog lambda: ' num2str(lambda) ', K = ' num2str(K) '\n']);
-    beta = penLogRegLS(yTr, tXTr, lambda);
+    fprintf(['PLRLS-Newton lambda: ' num2str(lambda) ', K = ' num2str(K) '\n']);
+    beta = PLRLSNewton(yTr, tXTr, lambda);
     
     % Predict
     NValid = size(XValid, 1);
