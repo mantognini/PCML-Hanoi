@@ -7,7 +7,7 @@ function beta = penLogisticRegression(y,tX,lambda)
     
     % Newton's method is equivalent to gradient descent with a custom
     % gradient taking into account second-order information
-    customGradient = @(y, tX, beta) logisticRegHessian(tX, beta) \ logisticRegGradient(y, tX, beta);
+    customGradient = @(y, tX, beta) penLogRegHessian(tX, beta, lambda) \ penLogRegGradient(y, tX, beta, lambda);
     beta = GDLS(y, tX, beta0, maxIters, precision, customGradient);
 end
 

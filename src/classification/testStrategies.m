@@ -14,11 +14,11 @@ strategies = {
         @noFilter,
         % method for the unique cluster
         {{
-            {@dummyClassificationMethod, 'dummy'},
-            {@naiveClassificationMethod, 'naive'},
-%             {@logisticClassificationMethod, 'logReg'},
+%             {@dummyClassificationMethod, 'dummy'},
+%             {@naiveClassificationMethod, 'naive'},
+            {@logisticClassificationMethod, 'logReg'},
 %             {@logisticClassificationWithManualSplittingMethod, 'logReg+M'},
-%             {@penLogRegLSMethod, 'penLogReg'},
+            {@penLogRegLSMethod, 'penLogReg'},
         }}
     },
 };
@@ -66,8 +66,7 @@ for splitterNo = 1:numel(strategies)
                 yValidPred = method(XTr, yTr, XValid);
                 
                 % Compute error
-                mismatch = length(find(yValidPred ~= yValid));
-                error(seed, methodNo) = mismatch / length(yValidPred);
+                error(seed, methodNo) = zeroOneLoss(yValid, yValidPred);
             end % methods
 
         end % seeds
