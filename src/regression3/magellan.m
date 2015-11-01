@@ -156,6 +156,7 @@ function doBoxplot()
         { @overallMeanMethod, true, false, 'overall mean' },
         
         { @meanMethod, true, false, 'mean' },
+        { @meanMethod, false, false, 'mean + auto' },
         
         { @GDLSMethod, true, false, 'GDLS' },
         { @GDLSMethod, true, true, 'GDLS - outliers' },
