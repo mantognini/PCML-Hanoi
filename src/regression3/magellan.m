@@ -153,35 +153,39 @@ function doBoxplot()
 
     methods = {
         % method, manual cluster, remove outliers, name %
-%         { @overallMeanMethod, true, false, 'overall mean' },
+        { @overallMeanMethod, true, false, 'overall mean' },
+        
         { @meanMethod, true, false, 'mean' },
+        
         { @GDLSMethod, true, false, 'GDLS' },
         { @GDLSMethod, true, true, 'GDLS - outliers' },
-        { @GDLSMethod, false, false, 'GDLS + auto' },
-        { @GDLSMethod, false, true, 'GDLS + auto - outliers' },
+        
         { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
         { @linearRidgeKFoldMethod, true, true, 'linear rigde - outliers' },
-        { @linearRidgeKFoldMethod, false, false, 'linear rigde + auto' },
-        { @emplifiedRidgeKFoldMethod1, true, false, 'emplified ridge 1' },
-        { @emplifiedRidgeKFoldMethod1, true, true, 'emplified ridge 1 - outliers' },
-        { @emplifiedRidgeKFoldMethod1, false, false, 'emplified ridge 1 + auto' },
-        { @emplifiedRidgeKFoldMethod2, true, false, 'emplified ridge 2' },
-        { @emplifiedRidgeKFoldMethod2, true, true, 'emplified ridge 2 - outliers' },
-        { @emplifiedRidgeKFoldMethod2, false, false, 'emplified ridge 2 + auto' },
+        
+%         { @emplifiedRidgeKFoldMethod1, true, false, 'emplified ridge 1' },
+%         { @emplifiedRidgeKFoldMethod1, true, true, 'emplified ridge 1 - outliers' },
+%         { @emplifiedRidgeKFoldMethod2, true, false, 'emplified ridge 2' },
+%         { @emplifiedRidgeKFoldMethod2, true, true, 'emplified ridge 2 - outliers' },
         { @emplifiedRidgeKFoldMethod3, true, false, 'emplified ridge 3' },
         { @emplifiedRidgeKFoldMethod3, true, true, 'emplified ridge 3 - outliers' },
-        { @emplifiedRidgeKFoldMethod3, false, false, 'emplified ridge 3 + auto' },
-        { @emplifiedRidgeKFoldMethod4, true, false, 'emplified ridge 4' },
-        { @emplifiedRidgeKFoldMethod4, true, true, 'emplified ridge 4 - outliers' },
-        { @emplifiedRidgeKFoldMethod4, false, false, 'emplified ridge 4 + auto' },
+%         { @emplifiedRidgeKFoldMethod4, true, false, 'emplified ridge 4' },
+%         { @emplifiedRidgeKFoldMethod4, true, true, 'emplified ridge 4 - outliers' },
+
         { @finalMethod, true, false, 'phis' },
         { @finalMethod, true, true, 'phis - outliers' },
+        
+        { @GDLSMethod, false, false, 'GDLS + auto' },
+        { @linearRidgeKFoldMethod, false, false, 'linear rigde + auto' },
+%         { @emplifiedRidgeKFoldMethod1, false, false, 'emplified ridge 1 + auto' },
+%         { @emplifiedRidgeKFoldMethod2, false, false, 'emplified ridge 2 + auto' },
+        { @emplifiedRidgeKFoldMethod3, false, false, 'emplified ridge 3 + auto' },
+%         { @emplifiedRidgeKFoldMethod4, false, false, 'emplified ridge 4 + auto' },
         { @finalMethod, false, false, 'phis + auto' },
-        { @finalMethod, false, true, 'phis + auto - outliers' },
     };
 
     M = numel(methods);
-    S = 20;
+    S = 50;
     splitRatio = 0.7;
     
     rmse = zeros(S, M);
