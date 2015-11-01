@@ -1,4 +1,4 @@
-function yValidPred = LRLSManual(XTr, yTr, XValid)
+function yValidPred = LRLSManualMethod(XTr, yTr, XValid)
 % Apply logistic regression on data for
 % classification except with the 11th feature is > -10.
 %

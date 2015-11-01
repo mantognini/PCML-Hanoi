@@ -1,7 +1,5 @@
 function [X, y] = outliersFilter(X, y)
-%NOFILTER Do not filter the data at all
 %
-
     D = size(X, 2);
 
     % Filter out outliers deduced by features analysis
@@ -17,7 +15,7 @@ function [X, y] = outliersFilter(X, y)
         if ~isDiscrete
             sigma = std(feature);
             mu = mean(feature);
-            idx = abs(feature - mu) >= 4 * sigma;
+            idx = abs(feature - mu) >= 2.8 * sigma;
 
             % Combine outliers indices
             if isInit
@@ -32,7 +30,7 @@ function [X, y] = outliersFilter(X, y)
     % Filter out outliers deduced by output analysis
     sigma = std(y);
     mu = mean(y);
-    idx = abs(y - mu) >= 4 * sigma;
+    idx = abs(y - mu) >= 2.8 * sigma;
 
     % Combine outliers indices
     idx_outliers = idx_outliers | idx;

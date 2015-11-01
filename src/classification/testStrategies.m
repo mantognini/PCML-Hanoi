@@ -4,7 +4,7 @@ clear all;
 data = loadClassificationData();
 
 % Settings
-seeds = 2;         % number of seed to be tested
+seeds = 3;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 strategies = {
@@ -12,22 +12,38 @@ strategies = {
         @noClusterSplitter,
         @noFeatureTransformation,
         @noFilter,
-        % method for the unique cluster
         {{
             {@dummyMethod, 'dummy'},
-%             {@naiveMethod, 'naive'},
+            {@naiveMethod, 'naive'},
+            {@LRLSManualMethod, 'logReg+Manual'},
+        }}
+    },
+    {
+        @noClusterSplitter,
+        @noFeatureTransformation,
+        @outliersFilter,
+        {{
+            {@LRLSManualMethod, 'logReg+Manual-out'},
         }}
     },
     {
         @noClusterSplitter,
         @dummyAndNorm,
-        @noFilter,
-        % method for the unique cluster
+        @outliersFilter,
         {{
-            {@LRLSMethod, 'logReg'},
-            {@LRLSManualMethod, 'logReg+M'},
-            {@PLRLSMethod, 'PLRLS'},
-            {@PLRLSNewtonMethod, 'PLRLS+New'},
+            {@LRLSMethod, 'logReg-out'},
+%             {@PLRLSMethod, 'PLRLS'},
+%             {@PLRLSNewtonMethod, 'PLRLS+New'},
+        }}
+    },
+    {
+        @noClusterSplitter,
+        @dummyAndNormAndGaussian,
+        @outliersFilter,
+        {{
+            {@LRLSMethod, 'logReg-out+^1/2'},
+%             {@PLRLSMethod, 'PLRLS'},
+%             {@PLRLSNewtonMethod, 'PLRLS+New'},
         }}
     },
 };
@@ -46,6 +62,10 @@ for splitterNo = 1:numel(strategies)
     for k = 1:K
         methods = strategies{splitterNo}{4}{k};
         cluster = featureTransformation(clusters{k});
+        
+%         % plot feature repartition
+%         figure;
+%         boxplot(cluster.train.X);
         
         error = zeros(seeds, numel(methods));
         

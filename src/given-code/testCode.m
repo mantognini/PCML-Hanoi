@@ -57,8 +57,35 @@ disp('OK!');
 
 %%
 
+% generate binary data
+y = (y>0);
+
+% testing logistic regression + LS
+disp('LRLS...');
+alpha = 1e-3;
+tBeta = LRLS(y,tX);
+tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
+errorRatio = sum(tY ~= y) / size(y,1);
+assert(errorRatio < 0.2);
+disp('OK!');
+%%
+
+% generate binary data
+y = (y>0);
+
+% testing logistic regression + LS + Newton
+disp('LRLS + Newton...');
+alpha = 1e-3;
+tBeta = LRLSNewton(y,tX);
+tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
+errorRatio = sum(tY ~= y) / size(y,1);
+assert(errorRatio < 0.2);
+disp('OK!');
+
+%%
+
 % testing penalize logistic regression
-disp('penalized logistic regression...');
+disp('PLR...');
 alpha = 1e-3;
 lambda = 1e-2;
 tBeta = penLogisticRegression(y,tX,alpha,lambda);
@@ -67,13 +94,22 @@ errorRatio = sum(tY ~= y) / size(y,1);
 assert(errorRatio < 0.2);
 disp('OK!');
 
-
 %%
 
-% testing penalize logistic regression LS
-disp('penalized logistic regression...');
+% testing penalize logistic regression + LS
+disp('PLRLS...');
 lambda = 1e-2;
-tBeta = penLogRegLS(y,tX,lambda);
+tBeta = PLRLS(y,tX,lambda);
+tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
+errorRatio = sum(tY ~= y) / size(y,1);
+assert(errorRatio < 0.2);
+disp('OK!');
+%%
+
+% testing penalize logistic regression + LS + Newton
+disp('PLRLS+Newton...');
+lambda = 1e-2;
+tBeta = PLRLSNewton(y,tX,lambda);
 tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
 errorRatio = sum(tY ~= y) / size(y,1);
 assert(errorRatio < 0.2);
