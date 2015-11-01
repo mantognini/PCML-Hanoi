@@ -67,6 +67,18 @@ errorRatio = sum(tY ~= y) / size(y,1);
 assert(errorRatio < 0.2);
 disp('OK!');
 
+
+%%
+
+% testing penalize logistic regression LS
+disp('penalized logistic regression...');
+lambda = 1e-2;
+tBeta = penLogRegLS(y,tX,lambda);
+tY = 1.0 ./ (1.0 + exp(-tX * tBeta)) > 0.5;
+errorRatio = sum(tY ~= y) / size(y,1);
+assert(errorRatio < 0.2);
+disp('OK!');
+
 %%
 
 % code for writing csv files
