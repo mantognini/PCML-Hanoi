@@ -14,11 +14,13 @@ end
 
 function learningCurve()
     % Given the best learners for regression, compute rmse
+    global validRMSE trainRMSE seeds ratios method;
     
     % initial parameters
-    ratios = 0.6:0.025:0.9;
+    ratios = 0.6:0.05:0.9;
     seeds = 20;
-    clusterManuallyFlag = false;
+%     clusterManuallyFlag = false;
+    clusterManuallyFlag = true;
     
     % define method
 %     method = @linearRidgeKFoldMethod;
@@ -42,8 +44,14 @@ function learningCurve()
         fprintf('\n');
     end
     
+    rmse = zeros(2, seeds, length(ratios));
+    for s = 1:seeds
+        for r = 1:length(ratios)
+            rmse(1, s, r) = trainRMSE(s, r);
+            rmse(2, s, r) = validRMSE(s, r);
+        end
+    end
     figure('Name', 'Learning curve');
-    rmse = reshape([validRMSE; trainRMSE], 2, seeds, length(ratios));
     aboxplot(rmse, 'labels', ratios, 'colorgrad', 'orange_down');
     xlabel('Training set size');
     ylabel('RMSE');
@@ -153,15 +161,15 @@ function doBoxplot()
 
     methods = {
         % method, manual cluster, remove outliers, name %
-        { @overallMeanMethod, true, false, 'overall mean' },
+%         { @overallMeanMethod, true, false, 'overall mean' },
         
         { @meanMethod, true, false, 'mean' },
-        { @meanMethod, false, false, 'mean + auto' },
+%         { @meanMethod, false, false, 'mean + auto' },
         
         { @GDLSMethod, true, false, 'GDLS' },
         { @GDLSMethod, true, true, 'GDLS - outliers' },
         
-        { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
+%         { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
         { @linearRidgeKFoldMethod, true, true, 'linear rigde - outliers' },
         
 %         { @emplifiedRidgeKFoldMethod1, true, false, 'emplified ridge 1' },
@@ -173,34 +181,46 @@ function doBoxplot()
 %         { @emplifiedRidgeKFoldMethod4, true, false, 'emplified ridge 4' },
 %         { @emplifiedRidgeKFoldMethod4, true, true, 'emplified ridge 4 - outliers' },
 
-        { @finalMethod, true, false, 'phis' },
+%         { @finalMethod, true, false, 'phis' },
         { @finalMethod, true, true, 'phis - outliers' },
         
-        { @GDLSMethod, false, false, 'GDLS + auto' },
-        { @linearRidgeKFoldMethod, false, false, 'linear rigde + auto' },
+%         { @GDLSMethod, false, false, 'GDLS + auto' },
+%         { @linearRidgeKFoldMethod, false, false, 'linear rigde + auto' },
 %         { @emplifiedRidgeKFoldMethod1, false, false, 'emplified ridge 1 + auto' },
 %         { @emplifiedRidgeKFoldMethod2, false, false, 'emplified ridge 2 + auto' },
-        { @emplifiedRidgeKFoldMethod3, false, false, 'emplified ridge 3 + auto' },
+%         { @emplifiedRidgeKFoldMethod3, false, false, 'emplified ridge 3 + auto' },
 %         { @emplifiedRidgeKFoldMethod4, false, false, 'emplified ridge 4 + auto' },
-        { @finalMethod, false, false, 'phis + auto' },
+%         { @finalMethod, false, false, 'phis + auto' },
     };
 
     M = numel(methods);
-    S = 50;
+    S = 20;
     splitRatio = 0.7;
     
-    rmse = zeros(S, M);
+    rmseTr = zeros(S, M);
+    rmseVa = zeros(S, M);
     for s = 1:S
         fprintf(['seed ' num2str(s, '%02.0f') ' ']);
         for m = 1:M
             fprintf('.');
-            [rmse(s, m), ~] = runMethod(methods{m}{1}, methods{m}{2}, methods{m}{3}, splitRatio);
+            [rmseTr(s, m), rmseVa(s, m)] = ...
+                runMethod(methods{m}{1}, methods{m}{2}, methods{m}{3}, splitRatio);
         end
         fprintf('\n');
     end
     
-    figure;
-    boxplot(rmse, 1:M);
+    figure('Name', 'Training RMSE per method');
+    boxplot(rmseTr, 1:M);
+    methodNames = cellfun(@(x) x{4}, methods, 'UniformOutput', false);
+    for i = 1:M
+        methodNames{i} = [num2str(i) ' ' methodNames{i}];
+    end
+    legend(findobj(gca,'Tag','Box'), methodNames);
+    xlabel('methods');
+    ylabel('RMSE');
+    
+    figure('Name', 'Validation RMSE per method');
+    boxplot(rmseVa, 1:M);
     methodNames = cellfun(@(x) x{4}, methods, 'UniformOutput', false);
     for i = 1:M
         methodNames{i} = [num2str(i) ' ' methodNames{i}];
