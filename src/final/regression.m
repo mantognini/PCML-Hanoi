@@ -24,7 +24,7 @@ y = y_train(idx);
 
 % Compute rmse
 e = computeRmse(yValidPred - yValid);
-fprintf(['Final rmse: ' num2str(e)]);
+fprintf(['Final rmse is ' num2str(e) '; write it into test_errors_regression.csv\n']);
 
 % save yTestPred
 csvwrite('predictions_regression.csv', yTestPred);
