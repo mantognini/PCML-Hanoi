@@ -82,6 +82,13 @@ for i = 1:figures
     plotFeature(false, f, X_train, X_test);
 end
 
+%% Display one feature only
+
+f = 18;
+figure('Name', ['Histogram of feature ' num2str(f)]);
+histogram(X_train(:, f));
+xlabel(['feature ' num2str(f)]);
+
 
 %% Display bivariate histograms of key features with response
 figure('Name', 'Histograms of key features with response');
