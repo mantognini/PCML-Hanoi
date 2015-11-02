@@ -4,7 +4,7 @@ clear all;
 data = loadClassificationData();
 
 % Settings
-seeds = 3;         % number of seed to be tested
+seeds = 20;         % number of seed to be tested
 splitRatio = 0.7;   % training-validation ratio per cluster
 
 strategies = {
@@ -13,26 +13,26 @@ strategies = {
         @noFeatureTransformation,
         @noFilter,
         {{
-            {@dummyMethod, 'dummy'},
+            {@dummyMethod, 'majority'},
             {@naiveMethod, 'naive'},
             {@LRLSManualMethod, 'logReg+Manual'},
         }}
     },
-    {
-        @noClusterSplitter,
-        @noFeatureTransformation,
-        @outliersFilter,
-        {{
-            {@LRLSManualMethod, 'logReg+Manual-out'},
-        }}
-    },
+%     {
+%         @noClusterSplitter,
+%         @dummyAndNorm,
+%         @noFilter,
+%         {{
+%             {@LRLSMethod, 'logReg'},
+%         }}
+%     },
     {
         @noClusterSplitter,
         @dummyAndNorm,
         @outliersFilter,
         {{
             {@LRLSMethod, 'logReg-out'},
-            {@PLRLSMethod, 'PLRLS-out'},
+            {@PLRLSMethod, 'penalized'},
 %             {@PLRLSNewtonMethod, 'PLRLS-out+Newton'},
         }}
     },
@@ -41,7 +41,7 @@ strategies = {
         @dummyAndNormAndGaussian,
         @outliersFilter,
         {{
-            {@LRLSMethod, 'logReg-out+^1/2'},
+            {@LRLSMethod, 'transformed'},
 %             {@PLRLSMethod, 'PLRLS-out+1/2'},
 %             {@PLRLSNewtonMethod, 'PLRLS-out+1/2+New'},
         }}
