@@ -14,13 +14,12 @@ end
 
 function learningCurve()
     % Given the best learners for regression, compute rmse
-    global validRMSE trainRMSE seeds ratios method;
     
     % initial parameters
     ratios = 0.6:0.05:0.9;
-    seeds = 20;
-%     clusterManuallyFlag = false;
-    clusterManuallyFlag = true;
+    seeds = 50;
+    keepDiscreteFlag = true;
+    filterOutliersFlag = true;
     
     % define method
 %     method = @linearRidgeKFoldMethod;
@@ -37,7 +36,7 @@ function learningCurve()
         
         for s = 1:seeds
             fprintf('.');
-            [rmseTr, rmseVa] = runMethod(method, clusterManuallyFlag, false, ratio);
+            [rmseTr, rmseVa] = runMethod(method, keepDiscreteFlag, filterOutliersFlag, ratio);
             validRMSE(s, r) = rmseVa;
             trainRMSE(s, r) = rmseTr;
         end
@@ -52,10 +51,11 @@ function learningCurve()
         end
     end
     figure('Name', 'Learning curve');
-    aboxplot(rmse, 'labels', ratios, 'colorgrad', 'orange_down');
-    xlabel('Training set size');
-    ylabel('RMSE');
-    legend('train', 'valid');
+    colors = colormap(lines(2));
+    aboxplot(rmse, 'labels', ratios, 'colormap', colors);
+    xlabel('Training set size', 'FontSize', 20);
+    ylabel('RMSE', 'FontSize', 20);
+    legend('Training', 'Validation');
     title(['Learning curve for ' func2str(method)]);
 end
 
@@ -63,8 +63,8 @@ function lambdaPlot()
     K = 10;
     degrees = 1:6;
     clusterManuallyFlag = false;
-    clusters = 1:3;
-    S = 20; % if 1 -> lambda curves, otherwise boxplot
+    clusters = 3;%1:3;
+    S = 50; % if 1 -> lambda curves, otherwise boxplot
     
     if S > 1
         lambdas = logspace(-5, 12, 20); % not too many point here
@@ -136,8 +136,8 @@ function lambdaPlot()
                 figure('Name', ['cluster ' num2str(cluster) ': lambda/test rmse']);
                 kmseTe = reshape(kmseTe, length(degrees), length(lambdas));
                 semilogx(lambdas, kmseTe, '-', 'LineWidth', 4);
-                xlabel('lambda');
-                ylabel('Test RMSE');
+                xlabel('lambda', 'FontSize', 20);
+                ylabel('Test RMSE', 'FontSize', 20);
                 title(['cluster ' num2str(cluster)]);
                 legend(arrayfun(@num2str, degrees'));
             end
@@ -148,8 +148,8 @@ function lambdaPlot()
             figure('Name', ['cluster ' num2str(cluster) ': lambda/test rmse']);
             colors = colormap(lines(length(degrees)));
             aboxplot(kmseTe, 'Colormap', colors);
-            xlabel('lambda');
-            ylabel('Test RMSE');
+            xlabel('Lambda', 'FontSize', 20);
+            ylabel('Test RMSE', 'FontSize', 20);
             title(['cluster ' num2str(cluster)]);
             legend(arrayfun(@num2str, degrees'), 'location', 'northwest');
             set(gca, 'XTickLabel', lambdas);
@@ -160,41 +160,18 @@ end
 function doBoxplot()
 
     methods = {
-        % method, manual cluster, remove outliers, name %
+        % method, keep discrete, remove outliers, name %
 %         { @overallMeanMethod, true, false, 'overall mean' },
-        
-        { @meanMethod, true, false, 'mean' },
-%         { @meanMethod, false, false, 'mean + auto' },
-        
-        { @GDLSMethod, true, false, 'GDLS' },
-        { @GDLSMethod, true, true, 'GDLS - outliers' },
-        
-%         { @linearRidgeKFoldMethod, true, false, 'linear rigde' },
-        { @linearRidgeKFoldMethod, true, true, 'linear rigde - outliers' },
-        
-%         { @emplifiedRidgeKFoldMethod1, true, false, 'emplified ridge 1' },
-%         { @emplifiedRidgeKFoldMethod1, true, true, 'emplified ridge 1 - outliers' },
-%         { @emplifiedRidgeKFoldMethod2, true, false, 'emplified ridge 2' },
-%         { @emplifiedRidgeKFoldMethod2, true, true, 'emplified ridge 2 - outliers' },
-        { @emplifiedRidgeKFoldMethod3, true, false, 'emplified ridge 3' },
-        { @emplifiedRidgeKFoldMethod3, true, true, 'emplified ridge 3 - outliers' },
-%         { @emplifiedRidgeKFoldMethod4, true, false, 'emplified ridge 4' },
-%         { @emplifiedRidgeKFoldMethod4, true, true, 'emplified ridge 4 - outliers' },
-
-%         { @finalMethod, true, false, 'phis' },
-        { @finalMethod, true, true, 'phis - outliers' },
-        
-%         { @GDLSMethod, false, false, 'GDLS + auto' },
-%         { @linearRidgeKFoldMethod, false, false, 'linear rigde + auto' },
-%         { @emplifiedRidgeKFoldMethod1, false, false, 'emplified ridge 1 + auto' },
-%         { @emplifiedRidgeKFoldMethod2, false, false, 'emplified ridge 2 + auto' },
-%         { @emplifiedRidgeKFoldMethod3, false, false, 'emplified ridge 3 + auto' },
-%         { @emplifiedRidgeKFoldMethod4, false, false, 'emplified ridge 4 + auto' },
-%         { @finalMethod, false, false, 'phis + auto' },
+        { @meanMethod, true, false, 'mean w/ outliers' },
+        { @meanMethod, true, true, 'mean' },
+        { @GDLSMethod, true, true, 'GDLS' },
+        { @linearRidgeKFoldMethod, true, true, 'linear rigde' },
+        { @emplifiedRidgeKFoldMethod3, true, true, 'amplified ridge' },
+        { @finalMethod, true, true, 'phis' },
     };
 
     M = numel(methods);
-    S = 20;
+    S = 50;
     splitRatio = 0.7;
     
     rmseTr = zeros(S, M);
@@ -216,8 +193,8 @@ function doBoxplot()
         methodNames{i} = [num2str(i) ' ' methodNames{i}];
     end
     legend(findobj(gca,'Tag','Box'), methodNames);
-    xlabel('methods');
-    ylabel('RMSE');
+    xlabel('Methods', 'FontSize', 20);
+    ylabel('Training RMSE', 'FontSize', 20);
     
     figure('Name', 'Validation RMSE per method');
     boxplot(rmseVa, 1:M);
@@ -226,26 +203,25 @@ function doBoxplot()
         methodNames{i} = [num2str(i) ' ' methodNames{i}];
     end
     legend(findobj(gca,'Tag','Box'), methodNames);
-    xlabel('methods');
-    ylabel('RMSE');
+    xlabel('Methods', 'FontSize', 20);
+    ylabel('Validation RMSE', 'FontSize', 20);
 end
 
-function [rmseTr, rmseVa] = runMethod(method, clusterManuallyFlag, filterOutliersFlag, splitRatio)
+function [rmseTr, rmseVa] = runMethod(method, keepDiscreteFlag, filterOutliersFlag, splitRatio)
     % SETTINGS
-%     displayClustersFlag = true;
-%     displayResultsFlag = true;
     displayClustersFlag = false;
     displayResultsFlag = false;
+    clusterManuallyFlag = true;
 
     [X_train, y_train, ~] = loadData();
     
     % Split into training & validation sets
-    %setSeed(splitSeed);
     [XTr, yTr, XVa, yVa] = doSplit(y_train, X_train, splitRatio);
     
     % Clusterize data
     XTe = XVa; % just a trick for clusterize
     [idxTr, idxVa, ~] = clusterize(clusterManuallyFlag, XTr, yTr, XVa, XTe);
+    clear XTe;
     
     % Display clusterized data
     if (displayClustersFlag)
@@ -262,6 +238,11 @@ function [rmseTr, rmseVa] = runMethod(method, clusterManuallyFlag, filterOutlier
     % Remove (or not) outliers
     if (filterOutliersFlag)
         [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr);
+    end
+    
+    if (~keepDiscreteFlag)
+        XTr(:, [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61]) = [];
+        XVa(:, [9, 11, 15, 22, 27, 30, 38, 40, 44, 47, 56, 61]) = [];
     end
 
     % Collect predictions
@@ -325,7 +306,7 @@ end
 function [XTr, yTr, idxTr] = filterOutliers(XTr, yTr, idxTr)
 
     % Remove Y-outliers
-    STD = 2; % keep 95%
+    STD = 3; % keep 97.5%
     for k = 1:3
         kSigma = std(yTr(idxTr == k));
         kMu = mean(yTr(idxTr == k));
