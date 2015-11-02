@@ -20,7 +20,7 @@ y = y_train(idx);
 [XTr, yTr, XValid, yValid] = doSplit(y, X, splitRatio);
 
 % Collect predictions
-[yValidPred, yTestPred, testRMSE] = method(XTr, yTr, XValid, X_test);
+[yValidPred, yTestPred, ~] = method(XTr, yTr, XValid, X_test);
 
 % Compute rmse
 e = computeRmse(yValidPred - yValid);

@@ -26,11 +26,11 @@ y = cluster.train.y(idx);
 
 
 % Collect predictions
-probabilities = finalMethodClassifiction(XTr, yTr, XValid);
-csvwrite('predictions_classification.csv', probabilities);
+[yVaPred, yTePred] = finalMethodClassifiction(XTr, yTr, XValid, cluster.test.X);
+csvwrite('predictions_classification.csv', yTePred);
 
 % Compute error
-error = zeroOneLoss(yValid, sigmToZeroOne(probabilities));
+error = zeroOneLoss(yValid, sigmToZeroOne(yVaPred));
 fprintf(['0-1 Loss error is ' num2str(error) '; report it in test_errors_classification.csv\n']);
 
 

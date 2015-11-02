@@ -1,4 +1,4 @@
-function probabilites = finalMethodClassifiction(XTr, yTr, XValid)
+function [yVaPred, yTePred] = finalMethodClassifiction(XTr, yTr, XValid, XTe)
 % Based on PLRLSMethod; return p(y = 1|XTr, yTr) for XValid
     % Compute model
     NTr = length(yTr);
@@ -10,7 +10,12 @@ function probabilites = finalMethodClassifiction(XTr, yTr, XValid)
     
     % Predict
     NValid = size(XValid, 1);
+    NTe = size(XTe, 1);
+    
     txValid = [ones(NValid, 1) XValid];
-    probabilites = sigmoid(txValid * beta);
+    tXTe = [ones(NTe, 1) XTe];
+    
+    yVaPred = sigmoid(txValid * beta);
+    yTePred = sigmoid(tXTe * beta);
 end
 

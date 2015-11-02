@@ -65,8 +65,6 @@ function sig = sigmoid(x)
     sig = zeros(N, 1);
     sig(posIdx) = ones(length(xPos), 1)  ./ (1 + exp(-xPos));
     sig(negIdx) = exp(xNeg) ./ (1 + exp(xNeg));
-    
-    % x(find(isnan(sig)))
 end
 
 
