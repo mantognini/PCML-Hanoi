@@ -434,7 +434,7 @@ function [kyTrPred, kyVaPred] = emplifiedRidgeKFoldMethod4(kXTr, kyTr, kXVa, k, 
 end
 
 function [kyTrPred, kyVaPred] = finalMethod(kXTr, kyTr, kXVa, k, ~, ~)
-    kXTe = kXVa; % just a trick for finalMethod_impl
-    [kyTrPred, kyVaPred, ~] = finalMethod_impl(kXTr, kyTr, kXVa, kXTe, k);
+    kXTe = kXVa; % just a trick for finalMethodRegression_impl
+    [kyTrPred, kyVaPred, ~] = finalMethodRegression_impl(kXTr, kyTr, kXVa, kXTe, k);
 end
 

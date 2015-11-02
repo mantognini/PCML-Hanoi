@@ -1,5 +1,5 @@
 
-function [yVaPred, yTePred, rmseTr] = finalMethod(XTr, yTr, XVa, XTe)
+function [yVaPred, yTePred, rmseTr] = finalMethodRegression(XTr, yTr, XVa, XTe)
     manually = true;
     [idxTr, idxVa, idxTe] = clusterize(manually, XTr, yTr, XVa, XTe);
     
@@ -15,7 +15,7 @@ function [yVaPred, yTePred, rmseTr] = finalMethod(XTr, yTr, XVa, XTe)
         kXVa = XVa(idxVa == k, :);
         kXTe = XTe(idxTe == k, :);
         
-        [kyTrPred, kyVaPred, kyTePred] = finalMethod_impl(kXTr, kyTr, kXVa, kXTe, k);
+        [kyTrPred, kyVaPred, kyTePred] = finalMethodRegression_impl(kXTr, kyTr, kXVa, kXTe, k);
         
         yTrPred(idxTr == k) = kyTrPred;
         yVaPred(idxVa == k) = kyVaPred;

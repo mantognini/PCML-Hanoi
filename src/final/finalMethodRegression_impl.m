@@ -1,5 +1,5 @@
 
-function [kyTrPred, kyVaPred, kyTePred] = finalMethod_impl(kXTr, kyTr, kXVa, kXTe, k)
+function [kyTrPred, kyVaPred, kyTePred] = finalMethodRegression_impl(kXTr, kyTr, kXVa, kXTe, k)
     D = size(kXTr, 2);
     kPhis = buildPhis(D, k);
     ktXTr = mapPhis(kPhis, kXTr);
