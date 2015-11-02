@@ -32,8 +32,8 @@ strategies = {
         @outliersFilter,
         {{
             {@LRLSMethod, 'logReg-out'},
-%             {@PLRLSMethod, 'PLRLS'},
-%             {@PLRLSNewtonMethod, 'PLRLS+New'},
+            {@PLRLSMethod, 'PLRLS-out'},
+%             {@PLRLSNewtonMethod, 'PLRLS-out+Newton'},
         }}
     },
     {
@@ -42,8 +42,8 @@ strategies = {
         @outliersFilter,
         {{
             {@LRLSMethod, 'logReg-out+^1/2'},
-%             {@PLRLSMethod, 'PLRLS'},
-%             {@PLRLSNewtonMethod, 'PLRLS+New'},
+%             {@PLRLSMethod, 'PLRLS-out+1/2'},
+%             {@PLRLSNewtonMethod, 'PLRLS-out+1/2+New'},
         }}
     },
 };
