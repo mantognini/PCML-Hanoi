@@ -27,7 +27,7 @@ y = cluster.train.y(idx);
 
 % Collect predictions
 [yVaPred, yTePred] = finalMethodClassifiction(XTr, yTr, XValid, cluster.test.X);
-csvwrite('predictions_classification.csv', yTePred);
+% csvwrite('predictions_classification.csv', yTePred);
 
 % Compute error
 error = zeroOneLoss(yValid, sigmToZeroOne(yVaPred));
