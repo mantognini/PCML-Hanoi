@@ -7,18 +7,25 @@ addpath(genpath('data/train/'));
 load 'data/train/train.mat';
 
 %% --browse through the images and look at labels
+addpath(genpath('toolboxs/piotr/'));
 for i=1:10
     clf();
-
+    
     % load img
     img = imread( sprintf('train/imgs/train%05d.jpg', i) );
 
     % show img
+    subplot(121);
     imshow(img);
+    title(sprintf('%d-th image; Label %d', i, train.y(i)));
 
-    title(sprintf('Label %d', train.y(i)));
+    % show hog features analysis
+    subplot(122);
+    feature = hog( single(img)/255, 17, 8);
+    im( hogDraw(feature) ); colormap gray;
+    axis off; colorbar off;
 
-    pause;  % wait for key, 
+    pause;  % wait for key
 end
 
 %% -- Example: split half and half into train/test, use HOG features
@@ -109,5 +116,5 @@ for i=20:30  % just 10 of them, though there are thousands
     % show if it is classified as pos or neg, and true label
     title(sprintf('Label: %d, Pred: %d', train.y(Te.idxs(i)), classVote(i)));
 
-    pause;  % wait for keydo that then, 
+    pause;  % wait for key
 end
