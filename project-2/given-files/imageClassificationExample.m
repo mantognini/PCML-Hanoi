@@ -1,12 +1,10 @@
 clearvars;
 
 % -- GETTING STARTED WITH THE IMAGE CLASSIFICATION DATASET -- %
-% IMPORTANT:
-%    Make sure you downloaded the file train.tar.gz provided to you
-%    and uncompressed it in the same folder as this file resides.
 
 % Load features and labels of training data
-load train/train.mat;
+addpath(genpath('data/train/'));
+load 'data/train/train.mat';
 
 %% --browse through the images and look at labels
 for i=1:10
@@ -41,7 +39,7 @@ Te.y = train.y(Te.idxs);
 %%
 fprintf('Training simple neural network..\n');
 
-addpath(genpath('where/the/deeplearningtoolboxis/'));
+addpath(genpath('toolboxs/DeepLearnToolbox-master/'));
 
 
 rng(8339);  % fix seed, this    NN may be very sensitive to initialization
@@ -49,7 +47,7 @@ rng(8339);  % fix seed, this    NN may be very sensitive to initialization
 % setup NN. The first layer needs to have number of features neurons,
 %  and the last layer the number of classes (here four).
 nn = nnsetup([size(Tr.X,2) 10 4]);
-opts.numepochs =  20;   %  Number of full sweeps through data
+opts.numepochs =  40;   %  Number of full sweeps through data
 opts.batchsize = 100;  %  Take a mean gradient step over this many samples
 
 % if == 1 => plots trainin error as the NN is trained
