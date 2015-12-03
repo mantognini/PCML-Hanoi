@@ -9,6 +9,8 @@ eps = 0.0001;
 assert(abs(BER([p1; p2], [p2; p1]) - 1) < eps); % all wrong
 assert(abs(BER([p1; p2], [p1; p2]) - 0) < eps); % all correct
 
+fprintf('BER Basic cases passed\n');
+
 %% Concrete case from 
 % http://icapeople.epfl.ch/mekhan/pcml15/project-2/objectDetection.html
 
@@ -21,6 +23,8 @@ cunningPredictions = ones(100, 1);
 eps = 0.0001;
 assert((BER([negSamples; posSamples], naivePredictions) - 0.5) < eps);
 assert((BER([negSamples; posSamples], cunningPredictions) - 0.5) < eps);
+
+fprintf('BER Concrete cases passed\n');
 
 %% Advanced cases
 
@@ -38,6 +42,8 @@ predPos2 = zeros(4, 1); % 40% are wrongly guessed
 eps = 0.0001;
 ber = BER([negSamples; posSamples], [predNeg1; predNeg2; predPos1; predPos2]);
 assert((ber - 0.4) < eps); % ber is average error percentage on each class
+
+fprintf('BER Advanced cases passed\n');
 
 %% Multiclass case
 
@@ -58,4 +64,6 @@ guess3Neg = zeros(30, 1);
 eps = 0.0001;
 ber = BER([p1; p2; p3], [guess1Pos; guess1Neg; guess2Pos; guess2Neg; guess3Pos; guess3Neg]);
 assert((ber - 0.6) < eps); % ber is average error percentage on each class
+
+fprintf('BER Multiclass cases passed\n');
 
