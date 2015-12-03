@@ -5,8 +5,9 @@ clear all;
 p1 = ones(50, 1);
 p2 = zeros(50, 1);
 
-assert(BER([p1; p2], [p2; p1]) == 1); % all wrong
-assert(BER([p1; p2], [p1; p2]) == 0); % all correct
+eps = 0.0001;
+assert(abs(BER([p1; p2], [p2; p1]) - 1) < eps); % all wrong
+assert(abs(BER([p1; p2], [p1; p2]) - 0) < eps); % all correct
 
 %% Concrete case from 
 % http://icapeople.epfl.ch/mekhan/pcml15/project-2/objectDetection.html
@@ -17,9 +18,9 @@ posSamples = ones(10, 1); % 10% positive samples
 naivePredictions = ones(100, 1) * (-1);
 cunningPredictions = ones(100, 1);
 
-
-assert(BER([negSamples; posSamples], naivePredictions) == 0.5);
-assert(BER([negSamples; posSamples], cunningPredictions) == 0.5);
+eps = 0.0001;
+assert((BER([negSamples; posSamples], naivePredictions) - 0.5) < eps);
+assert((BER([negSamples; posSamples], cunningPredictions) - 0.5) < eps);
 
 %% Advanced cases
 
@@ -34,6 +35,8 @@ n2 = 6; % 0.6 * 10
 predPos1 = ones(n2, 1); % 60% of positive samples are correctly guessed
 predPos2 = zeros(4, 1); % 40% are wrongly guessed
 
+eps = 0.0001;
 ber = BER([negSamples; posSamples], [predNeg1; predNeg2; predPos1; predPos2]);
-assert(ber == 0.4); % ber is average error percentage on each class
+assert((ber - 0.4) < eps); % ber is average error percentage on each class
+
 
