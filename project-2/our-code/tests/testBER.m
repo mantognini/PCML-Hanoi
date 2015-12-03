@@ -30,8 +30,8 @@ n1 = 54; % 0.6 * 90
 predNeg1 = zeros(n1, 1); % 60% of negative samples are correctly guessed
 predNeg2 = ones(90 - 54, 1); % 40% are wrongly guessed
 
-n2 = 6; % 0.6 * 11
-predPos1 = ones(6, 1); % 60% of positive samples are correctly guessed
+n2 = 6; % 0.6 * 10
+predPos1 = ones(n2, 1); % 60% of positive samples are correctly guessed
 predPos2 = zeros(4, 1); % 40% are wrongly guessed
 
 ber = BER([negSamples; posSamples], [predNeg1; predNeg2; predPos1; predPos2]);
