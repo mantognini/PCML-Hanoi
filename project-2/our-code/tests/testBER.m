@@ -1,6 +1,13 @@
 %%
 clear all;
 
+%% Basic cases
+p1 = ones(50, 1);
+p2 = zeros(50, 1);
+
+assert(BER([p1; p2], [p2; p1]) == 1); % all wrong
+assert(BER([p1; p2], [p1; p2]) == 0); % all correct
+
 %% Concrete case from 
 % http://icapeople.epfl.ch/mekhan/pcml15/project-2/objectDetection.html
 
