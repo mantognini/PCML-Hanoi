@@ -15,14 +15,20 @@ for i=1:10
     img = imread( sprintf('train/imgs/train%05d.jpg', i) );
 
     % show img
-    subplot(121);
+    subplot(131);
     imshow(img);
     title(sprintf('%d-th image; Label %d', i, train.y(i)));
 
     % show hog features analysis
-    subplot(122);
+    subplot(132);
     feature = hog( single(img)/255, 17, 8);
     im( hogDraw(feature) ); colormap gray;
+    axis off; colorbar off;
+    
+    subplot(133);
+    f = train.X_hog(i, :);
+    f = reshape(f, 13, 13, 32); % Those dimensions correspond to hog( single(img)/255, 17, 8);
+    im( hogDraw(f) ); colormap gray;
     axis off; colorbar off;
 
     pause;  % wait for key
