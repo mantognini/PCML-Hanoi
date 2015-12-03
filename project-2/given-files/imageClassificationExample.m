@@ -33,6 +33,7 @@ for i=1:10
 
     pause;  % wait for key
 end
+clear i f img;
 
 %% -- Example: split half and half into train/test, use HOG features
 fprintf('Splitting into train/test..\n');
@@ -41,18 +42,23 @@ Tr = [];
 Te = [];
 
 % NOTE: you should do this randomly! and k-fold!
-Tr.idxs = 1:2:size(train.X_hog,1);
+idx = randperm(size(train.X_hog,1));
+mid = floor(length(idx)/2);
+Tr.idxs = idx(1:mid);
 Tr.X = train.X_hog(Tr.idxs,:);
 Tr.y = train.y(Tr.idxs);
 
-Te.idxs = 2:2:size(train.X_hog,1);
+Te.idxs = idx(mid+1:end);
 Te.X = train.X_hog(Te.idxs,:);
 Te.y = train.y(Te.idxs);
+
+clear idx mid;
 
 %%
 fprintf('Training simple neural network..\n');
 
 addpath(genpath('toolboxs/DeepLearnToolbox-master/'));
+addpath(genpath('our-code/'));
 
 
 rng(8339);  % fix seed, this    NN may be very sensitive to initialization
@@ -60,8 +66,10 @@ rng(8339);  % fix seed, this    NN may be very sensitive to initialization
 % setup NN. The first layer needs to have number of features neurons,
 %  and the last layer the number of classes (here four).
 nn = nnsetup([size(Tr.X,2) 10 4]);
-opts.numepochs =  40;   %  Number of full sweeps through data
+opts.numepochs =  40;  %  Number of full sweeps through data
 opts.batchsize = 100;  %  Take a mean gradient step over this many samples
+
+% WARNING: numepochs or batchsize too big seems to overfit!
 
 % if == 1 => plots trainin error as the NN is trained
 opts.plot               = 1;
@@ -106,8 +114,10 @@ nnPred = nn.a{end};
 % get overall error [NOTE!! this is not the BER, you have to write the code
 %                    to compute the BER!]
 predErr = sum( classVote ~= Te.y ) / length(Te.y);
-
 fprintf('\nTesting error: %.2f%%\n\n', predErr * 100 );
+
+berErr = BER(Te.y, classVote);
+fprintf('\nBER Testing error: %.2f%%\n\n', berErr * 100 );
 
 
 %% visualize samples and their predictions (test set)
