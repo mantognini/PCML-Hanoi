@@ -45,11 +45,13 @@ Te = [];
 idx = randperm(size(train.X_hog,1));
 mid = floor(length(idx)/2);
 Tr.idxs = idx(1:mid);
-Tr.X = train.X_hog(Tr.idxs,:);
+%Tr.X = train.X_hog(Tr.idxs,:);
+Tr.X = train.X_cnn(Tr.idxs,:);
 Tr.y = train.y(Tr.idxs);
 
 Te.idxs = idx(mid+1:end);
-Te.X = train.X_hog(Te.idxs,:);
+%Te.X = train.X_hog(Te.idxs,:);
+Te.X = train.X_cnn(Te.idxs,:);
 Te.y = train.y(Te.idxs);
 
 clear idx mid;
@@ -65,8 +67,8 @@ rng(8339);  % fix seed, this    NN may be very sensitive to initialization
 
 % setup NN. The first layer needs to have number of features neurons,
 %  and the last layer the number of classes (here four).
-nn = nnsetup([size(Tr.X,2) 10 4]);
-opts.numepochs =  40;  %  Number of full sweeps through data
+nn = nnsetup([size(Tr.X,2) 100 4]);
+opts.numepochs =  20;  %  Number of full sweeps through data
 opts.batchsize = 100;  %  Take a mean gradient step over this many samples
 
 % WARNING: numepochs or batchsize too big seems to overfit!
