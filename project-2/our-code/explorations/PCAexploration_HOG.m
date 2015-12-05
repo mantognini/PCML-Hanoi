@@ -66,7 +66,7 @@ xlabel('M');
 ylabel('J');
 title('distortion J vs M');
 
-clear Jm m Xavg l S;
+clear Jm m;
 
 %%
 % M = 1000 seems a good upper bound value but something smaller might
