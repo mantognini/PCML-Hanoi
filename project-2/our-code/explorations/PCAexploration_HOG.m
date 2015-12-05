@@ -4,9 +4,28 @@ clearvars;
 addpath(genpath('data/train/'));
 load 'data/train/train.mat';
 
+%%
+fprintf('Splitting into train/test..\n');
+
+Tr = [];
+Te = [];
+
+idx = randperm(size(train.X_hog,1));
+mid = floor(length(idx)/2);
+
+Tr.idxs = idx(1:mid);
+Tr.X = train.X_hog(Tr.idxs,:);
+Tr.y = train.y(Tr.idxs);
+
+Te.idxs = idx(mid+1:end);
+Te.X = train.X_hog(Te.idxs,:);
+Te.y = train.y(Te.idxs);
+
+clear idx mid;
+
 %% PCA for HOG ("small" dimensionality)
 
-X = train.X_hog; % choose an image representation
+X = Tr.X;
 N = size(X, 1);
 D = size(X, 2);
 S = cov(X, 1);   % covariance matrix normalised by the number of samples N
@@ -87,16 +106,17 @@ Xt = z(:, 1:M) * U(:, 1:M)' + ones(N, 1) * b(M+1:D) * U(:, M+1:D)';
 addpath(genpath('toolboxs/piotr/'));
 for i=1:10
     clf();
-    img = imread( sprintf('train/imgs/train%05d.jpg', i) );
+    idx = Tr.idxs(i);
+    img = imread( sprintf('train/imgs/train%05d.jpg', idx) );
 
     % show img
     subplot(221);
     imshow(img);
-    title(sprintf('%d-th image; Label %d', i, train.y(i)));
+    title(sprintf('%d-th image; Label %d', idx, Tr.y(i)));
 
     % show hog features analysis
     h = subplot(223);
-    Forig = train.X_hog(i, :);
+    Forig = Tr.X(i, :);
     Forig = reshape(Forig, 13, 13, 32); % Those dimensions correspond to hog( single(img)/255, 17, 8);
     im( hogDraw(Forig) ); colormap(h, 'gray');
     title('original HOG features');
