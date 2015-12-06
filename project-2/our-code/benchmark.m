@@ -14,7 +14,7 @@ train.X_hog = single(train.X_hog);
 train.y = single(train.y);
 
 % settings
-nbRuns = 1;
+nbRuns = 2;
 ratio = 0.7;
 
 %% Evaluating binary methods
@@ -50,7 +50,7 @@ end
 %% Evaluating multi-class methods
 % @randM4
 methods4 = {@randM4};
-error4 = zeros(nbRuns, length(methods2));
+error4 = zeros(nbRuns, length(methods4));
 
 for r = 1:nbRuns
     % Split the data
@@ -82,8 +82,8 @@ figure('Name', 'BER');
 
 subplot(1, 2, 1);
 labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
-boxplot(sum(error2, 2), 'labels', labels2);
+boxplot(error2, 'labels', labels2);
 
 subplot(1, 2, 2);
 labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
-boxplot(sum(error4, 2), 'labels', labels4);
+boxplot(error4, 'labels', labels4);
