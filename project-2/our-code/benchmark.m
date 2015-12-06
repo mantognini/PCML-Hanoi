@@ -8,15 +8,23 @@ clearvars;
 addpath(genpath('data/train/'));
 load 'data/train/train.mat';
 
-%% Evaluating methods
-methods = {@randomMethod};
-nbRuns = 10;
-error = zeros(nbRuns, length(methods));
+% avoid future bugs
+train.X_cnn = single(train.X_cnn);
+train.X_hog = single(train.X_hog);
+train.y = single(train.y);
+
+% settings
+nbRuns = 1;
+ratio = 0.7;
+
+%% Evaluating binary methods
+% @randomMethod2
+methods2 = {@randomMethod2};
+error2 = zeros(nbRuns, length(methods2));
 
 for r = 1:nbRuns
     % Split the data
     N = size(train.y, 1);
-    ratio = 0.7;
     splitIdx = floor(N * ratio);
 
     idx = randperm(N);
@@ -25,22 +33,57 @@ for r = 1:nbRuns
 
     data.train.X.hog = train.X_hog(idxTrain, :);
     data.train.X.cnn = train.X_cnn(idxTrain, :);
-    data.train.y = train.y(idxTrain);
+    data.train.y = train.y(idxTrain); % train y are 4-class
 
     data.valid.X.hog = train.X_hog(idxValid, :);
     data.valid.X.cnn = train.X_cnn(idxValid, :);
-    data.valid.y = train.y(idxValid);
+    data.valid.y = toBinary(train.y(idxValid)); % valid y are binary
 
-    for m = 1:length(methods)
-        method = methods{m};
+    for m = 1:length(methods2)
+        method = methods2{m};
 
         yPred = method(data.train, data.valid.X);
-        error(r, m) = BER(yPred, data.valid.y);
+        error2(r, m) = BER(yPred, data.valid.y);
     end
 end
 
+%% Evaluating multi-class methods
+% @randomMethod4
+methods4 = {@randomMethod4};
+error4 = zeros(nbRuns, length(methods2));
+
+for r = 1:nbRuns
+    % Split the data
+    N = size(train.y, 1);
+    splitIdx = floor(N * ratio);
+
+    idx = randperm(N);
+    idxTrain = idx(1:splitIdx);
+    idxValid = idx(splitIdx + 1:end);
+
+    data.train.X.hog = train.X_hog(idxTrain, :);
+    data.train.X.cnn = train.X_cnn(idxTrain, :);
+    data.train.y = train.y(idxTrain); % train y are 4-class
+
+    data.valid.X.hog = train.X_hog(idxValid, :);
+    data.valid.X.cnn = train.X_cnn(idxValid, :);
+    data.valid.y = train.y(idxValid); % valid y are 4-class
+
+    for m = 1:length(methods4)
+        method = methods4{m};
+
+        yPred = method(data.train, data.valid.X);
+        error4(r, m) = BER(yPred, data.valid.y);
+    end
+end
 
 %% Plotting scores
-figure('Name', 'BER errors');
-labels = cellfun(@func2str, methods, 'UniformOutput', false);
-boxplot(sum(error, 2), 'labels', labels);
+figure('Name', 'BER');
+
+subplot(1, 2, 1);
+labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
+boxplot(sum(error2, 2), 'labels', labels2);
+
+subplot(1, 2, 2);
+labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
+boxplot(sum(error4, 2), 'labels', labels4);
