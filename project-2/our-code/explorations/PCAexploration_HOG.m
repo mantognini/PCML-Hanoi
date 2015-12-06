@@ -10,8 +10,10 @@ fprintf('Splitting into train/test..\n');
 Tr = [];
 Te = [];
 
+ratio = 0.7;
+
 idx = randperm(size(train.X_hog,1));
-mid = floor(length(idx)/2);
+mid = floor(length(idx) * ratio);
 
 Tr.idxs = idx(1:mid);
 Tr.X = train.X_hog(Tr.idxs,:);
@@ -21,10 +23,10 @@ Te.idxs = idx(mid+1:end);
 Te.X = train.X_hog(Te.idxs,:);
 Te.y = train.y(Te.idxs);
 
-clear idx mid;
+clear idx mid ratio;
 
 %% PCA for HOG ("small" dimensionality)
-
+tic
 X = Tr.X;
 N = size(X, 1);
 D = size(X, 2);
@@ -39,8 +41,9 @@ S = cov(X, 1);   % covariance matrix normalised by the number of samples N
 [l, I] = sort(l, 1, 'descend');
 U = U(:, I);
 clear I;
+toc
 
-% Apply PCA:
+%% Apply PCA:
 % compute z_ni and b_i from Bishop 12.10, p. 563
 
 % % THIS IS UTTERLY SLOW!
@@ -71,6 +74,7 @@ z = X * U;
 Xavg = mean(X, 1); % per features
 b = Xavg * U;
 
+%%
 % b and z are used to compute the "reduced" version of X given M dimension
 % To find the proper M, we compute the distortion measure J in terms of M
 
@@ -142,3 +146,115 @@ for i=1:10
 end
 
 clear h i img Forig Freduced;
+
+
+%% NN from z & b
+% 
+
+% NOTE: to run me, execute first the three top sections of this file.
+
+fprintf('Training simple neural network..\n');
+addpath(genpath('toolboxs/DeepLearnToolbox-master/'));
+
+% convert X to subspace of size M
+M = D;%1000;
+Tr.Z = Tr.X * U(:, 1:M);
+Te.Z = Te.X * U(:, 1:M);
+
+% NOTE: this ain't working... for some reason, "rotating" the space X to Z
+%       using U results in 75% of error when using NN while we have 25%
+%       of error when re-rotating Z to X with U' -- even when M = D so that
+%       we lose only on the precision of the computation.
+
+% err = sort(sort(abs(Tr.X - Tr.Z * U(:, 1:M)'))');
+% m = max(max(err));
+% imagesc(err); colorbar; caxis([0 m]);
+
+% Setup NN.
+inputSize  = M;
+innerSize  = 100;
+outputSize = 4;
+rng(8339);
+nn = nnsetup([inputSize innerSize outputSize]);
+
+opts.numepochs  = 15;
+opts.batchsize  = 100;
+opts.plot       = 1;
+nn.learningRate = 2;
+
+% normalize data
+[Tr.normZ, mu, sigma] = zscore(Tr.Z);
+Te.normZ = normalize(Te.Z, mu, sigma);
+[Tr.normZU, mu, sigma] = zscore(Tr.Z * U(:, 1:M)'); % equivalent to Tr.X
+Te.normZU = normalize(Te.Z * U(:, 1:M)', mu, sigma);
+[Tr.normX, mu, sigma] = zscore(Tr.X);
+Te.normX = normalize(Te.X, mu, sigma);
+
+% this neural network implementation requires number of samples to be a
+% multiple of batchsize, so we remove some for this to be true.
+numSampToUse = opts.batchsize * floor(size(Tr.normZ) / opts.batchsize);
+Tr.normZ     = Tr.normZ(1:numSampToUse, :);
+labels       = Tr.y(1:numSampToUse);
+
+% prepare labels for NN
+LL = [1 * (labels == 1), ... % first column, p(y=1)
+      1 * (labels == 2), ... % second column, p(y=2), etc
+      1 * (labels == 3), ...
+      1 * (labels == 4) ];
+[nn, ~] = nntrain(nn, Tr.normZ, LL, opts);
+
+% to get the scores we need to do nnff (feed-forward)
+nn.testing = 1;
+nn = nnff(nn, Te.normZ, zeros(size(Te.normZ, 1), nn.size(end)));
+nn.testing = 0;
+
+% predict on the test set
+nnPredZ = nn.a{end};
+
+% get the most likely class
+[~, predictionsZ] = max(nnPredZ, [], 2);
+
+% Apply the same NN with different inputs: ZU
+nn = nnsetup([inputSize innerSize outputSize]);
+nn.learningRate = 2;
+[nn, ~] = nntrain(nn, Tr.normZU, LL, opts);
+nn.testing = 1;
+nn = nnff(nn, Te.normZU, zeros(size(Te.normZU, 1), nn.size(end)));
+nn.testing = 0;
+nnPredZU = nn.a{end};
+% get the most likely class
+[~, predictionsZU] = max(nnPredZU, [], 2);
+
+% Apply the same NN with different inputs: X
+nn = nnsetup([inputSize innerSize outputSize]);
+nn.learningRate = 2;
+[nn, ~] = nntrain(nn, Tr.normX, LL, opts);
+nn.testing = 1;
+nn = nnff(nn, Te.normX, zeros(size(Te.normX, 1), nn.size(end)));
+nn.testing = 0;
+nnPredX = nn.a{end};
+% get the most likely class
+[~, predictionsX] = max(nnPredX, [], 2);
+
+berErrZ = BER(Te.y, predictionsZ);
+berErrZU = BER(Te.y, predictionsZU);
+berErrX = BER(Te.y, predictionsX);
+fprintf('\nBER Testing error  Z: %.2f%%\n', berErrZ * 100);
+fprintf('\nBER Testing error ZU: %.2f%%\n', berErrZU * 100);
+fprintf('\nBER Testing error  X: %.2f%%\n', berErrX * 100);
+
+figure; 
+subplot(131);
+imagesc(nnPredZ); colorbar;
+title('Z');
+subplot(132);
+imagesc(nnPredZU); colorbar;
+title('ZU');
+subplot(133);
+imagesc(nnPredX); colorbar;
+title('X');
+
+% NOTE: each subplot represent the same information but computed from a
+%       different input: each row is a sample of the test set, each
+%       column corresponds to a classification label and the color
+%       represents the probability of being in this or that category.
