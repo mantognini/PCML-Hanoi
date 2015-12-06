@@ -1,4 +1,4 @@
-function yPred = randomMethod(train, XValid)
+function yPred = randM4(train, XValid)
     NValid = size(XValid.hog, 1);
     
     % random predictions

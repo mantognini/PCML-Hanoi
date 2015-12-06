@@ -18,8 +18,8 @@ nbRuns = 1;
 ratio = 0.7;
 
 %% Evaluating binary methods
-% @randomMethod2
-methods2 = {@randomMethod2};
+% @randM2
+methods2 = {@randM2};
 error2 = zeros(nbRuns, length(methods2));
 
 for r = 1:nbRuns
@@ -48,8 +48,8 @@ for r = 1:nbRuns
 end
 
 %% Evaluating multi-class methods
-% @randomMethod4
-methods4 = {@randomMethod4};
+% @randM4
+methods4 = {@randM4};
 error4 = zeros(nbRuns, length(methods2));
 
 for r = 1:nbRuns
