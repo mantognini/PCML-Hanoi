@@ -18,10 +18,10 @@ nbRuns = 2;
 ratio = 0.7;
 
 %% Evaluating binary methods
-% BER   Method
+% med   25-75   Method
 % -------------------
-% 0.5   @randM2
-% 0.32  @linSvmHog2
+% 0.5           @randM2
+% 0.30  0.04    @linSvmHog2
 methods2 = {
     @randM2,
     @linSvmHog2
@@ -54,9 +54,9 @@ for r = 1:nbRuns
 end
 
 %% Evaluating multi-class methods
-% BER   Method
+% med   25-75   Method
 % -------------------
-% 0.75  @randM4
+% 0.75          @randM4
 methods4 = {
     @randM4
     };
