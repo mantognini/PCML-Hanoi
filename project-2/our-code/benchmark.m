@@ -14,7 +14,7 @@ train.X_hog = single(train.X_hog);
 train.y = single(train.y);
 
 % settings
-nbRuns = 1;
+nbRuns = 5;
 ratio = 0.7;
 
 %% Evaluating binary methods
@@ -22,13 +22,15 @@ ratio = 0.7;
 % -------------------
 % 0.5           @randM2
 % 0.30  0.04    @linSvmHogF2 C = 1
-% 0.235 0.04    @linSvmHogCV2 C* = 0.00023
+% 0.23  0.05    @linSvmHogCV2 C* = 0.00023
 methods2 = {
     @linSvmHogCV2
     };
 error2 = zeros(nbRuns, length(methods2));
 
 for r = 1:nbRuns
+    fprintf(['run n°' num2str(r) '/' num2str(nbRuns) '\n']);
+    
     % Split the data
     N = size(train.y, 1);
     splitIdx = floor(N * ratio);

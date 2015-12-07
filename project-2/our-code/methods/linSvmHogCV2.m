@@ -3,7 +3,7 @@ function yPred = linSvmHogCV2(train, XValid)
     train.y = toBinary(train.y);
     
     % Find best C
-    C = linspace(10^(-5), 10^(-3), 10)';
+    C = linspace(0.00012, 0.00035, 10)';
     [CStar, errStar, errors] = crossValid(train.X.hog, train.y, 10, C, @linSvmF2, @BER);
     
     % Predict

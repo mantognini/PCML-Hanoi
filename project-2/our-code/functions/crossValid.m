@@ -17,6 +17,8 @@ function [combiStar, errStar, errors] = crossValid(X, y, K, combi, modelFn, errF
         
         % K-Fold
         for k = 1:K
+            fprintf(['param ' num2str(n) '/' num2str(nbCombi) ', fold ' num2str(k) '/' num2str(K) '\n']);
+            
             % compute indices
             idxTe = idxCV(k, :);
             idxTr = idxCV([1:k-1 k+1:end], :);
