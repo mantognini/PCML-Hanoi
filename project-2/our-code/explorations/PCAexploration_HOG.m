@@ -6,7 +6,7 @@ addpath(genpath('toolboxs/DeepLearnToolbox-master/'));
 load 'data/train/train.mat';
 
 %%
-fprintf('Splitting into train/test & normalising..\n');
+fprintf('Splitting into train/test & normalising...\n');
 
 Tr = [];
 Te = [];
@@ -155,12 +155,12 @@ end
 clear h i img Forig Freduced;
 
 
-%% NN from z & b
+%% NN from U
 % 
 
 % NOTE: to run me, execute first the three top sections of this file.
 
-fprintf('Training simple neural network..\n');
+fprintf('Training simple neural network...\n');
 
 % convert X to subspace of size M
 M = 500; % 500 seems a good deal
