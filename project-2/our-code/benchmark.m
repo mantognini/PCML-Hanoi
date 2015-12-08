@@ -1,3 +1,4 @@
+%
 % Benchmark the different learning methods
 % reliably on several seeds
 % with visualizations
@@ -24,7 +25,7 @@ ratio = 0.7;
 % 0.30  0.04    @linSvmHogF2 C = 1
 % 0.23  0.05    @linSvmHogCV2 C* = 0.00023
 methods2 = {
-    @linSvmHogCV2
+    @linSvmHogCV2;
     };
 error2 = zeros(nbRuns, length(methods2));
 
@@ -47,10 +48,13 @@ for r = 1:nbRuns
     data.valid.X.cnn = train.X_cnn(idxValid, :);
     data.valid.y = toBinary(train.y(idxValid)); % valid y are binary
 
+    % Run the methods
     for m = 1:length(methods2)
         method = methods2{m};
 
         yPred = method(data.train, data.valid.X);
+        
+        % Compute the error
         error2(r, m) = BER(yPred, data.valid.y);
     end
 end
@@ -81,10 +85,13 @@ for r = 1:nbRuns
     data.valid.X.cnn = train.X_cnn(idxValid, :);
     data.valid.y = train.y(idxValid); % valid y are 4-class
 
+    % Run the methods
     for m = 1:length(methods4)
         method = methods4{m};
 
         yPred = method(data.train, data.valid.X);
+        
+        % Compute the errors
         error4(r, m) = BER(yPred, data.valid.y);
     end
 end
