@@ -7,6 +7,7 @@ load 'data/train/train.mat';
 
 %%
 fprintf('Splitting into train/test & normalising...\n');
+tic
 
 Tr = [];
 Te = [];
@@ -28,8 +29,10 @@ Te.y = train.y(Te.idxs);
 Te.normX = normalize(Te.X, mu, sigma);
 
 clear idx mid ratio;
+toc
 
 %% PCA for HOG ("small" dimensionality)
+fprintf('Extracting data & computing eigenvalues...\n');
 tic
 X = Tr.normX;    % ON NORMALISED DATA
 N = size(X, 1);
@@ -109,6 +112,10 @@ M = 1000;
 % Xt = Xtz + ones(N, 1) * Xtb;
 Xt = z(:, 1:M) * U(:, 1:M)' + ones(N, 1) * b(M+1:D) * U(:, M+1:D)';
 
+figure;
+diff = log(abs(X - Xt));
+diff = sort(sort(diff)');
+imagesc(diff); colorbar;
 
 %% Display lose of information for a given image
 addpath(genpath('toolboxs/piotr/'));
@@ -163,7 +170,7 @@ clear h i img Forig Freduced;
 fprintf('Training simple neural network...\n');
 
 % convert X to subspace of size M
-M = 500; % 500 seems a good deal
+M = 500; % 500 seems a good deal, we could probably use a smaller value though
 Tr.normZ = Tr.normX * U(:, 1:M);
 Te.normZ = Te.normX * U(:, 1:M);
 
@@ -236,16 +243,16 @@ fprintf('\nBER Testing error  Z: %.2f%%\n', berErrZ * 100);
 fprintf('\nBER Testing error ZU: %.2f%%\n', berErrZU * 100);
 fprintf('\nBER Testing error  X: %.2f%%\n', berErrX * 100);
 
-figure; 
+figure('Name', ['NN on HOG + PCA, M = ' num2str(M)]);
 subplot(131);
 imagesc(nnPredZ); colorbar;
-title('Z');
+title(['BER(Z) = ' num2str(berErrZ)]);
 subplot(132);
 imagesc(nnPredZU); colorbar;
-title('ZU');
+title(['BER(ZU) = ' num2str(berErrZU)]);
 subplot(133);
 imagesc(nnPredX); colorbar;
-title('X');
+title(['BER(X) = ' num2str(berErrX)]);
 
 % NOTE: each subplot represent the same information but computed from a
 %       different input: each row is a sample of the test set, each
