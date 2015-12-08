@@ -16,6 +16,7 @@ function yPred = svmF(X, y, XValid, kernelFn, C, params)
     otherIdx = (y == 0);
     y(otherIdx) = -1;
     y(~otherIdx) = 1;
+    y = single(y);
     
     % Find alpha star
     if nbParams > 0

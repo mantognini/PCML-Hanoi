@@ -9,11 +9,6 @@ clearvars;
 addpath(genpath('data/train/'));
 load 'data/train/train.mat';
 
-% avoid future bugs
-train.X_cnn = single(train.X_cnn);
-train.X_hog = single(train.X_hog);
-train.y = single(train.y);
-
 % settings
 nbRuns = 5;
 ratio = 0.7;
