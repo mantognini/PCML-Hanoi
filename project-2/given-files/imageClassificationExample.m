@@ -38,21 +38,35 @@ clear i f img;
 %% -- Example: split half and half into train/test, use HOG features
 fprintf('Splitting into train/test..\n');
 
+isBinary = 1;
+isCNN = 1;
+
+if isCNN
+    X = sparse(double(train.X_cnn));
+else
+    X = train.X_hog;
+end
+
 Tr = [];
 Te = [];
 
 % NOTE: you should do this randomly! and k-fold!
-idx = randperm(size(train.X_hog,1));
+idx = randperm(size(X,1));
 mid = floor(length(idx)/2);
 Tr.idxs = idx(1:mid);
-%Tr.X = train.X_hog(Tr.idxs,:);
-Tr.X = train.X_cnn(Tr.idxs,:);
+Tr.X = X(Tr.idxs,:);
 Tr.y = train.y(Tr.idxs);
 
 Te.idxs = idx(mid+1:end);
-%Te.X = train.X_hog(Te.idxs,:);
-Te.X = train.X_cnn(Te.idxs,:);
+Te.X = X(Te.idxs,:);
 Te.y = train.y(Te.idxs);
+
+
+if isBinary
+    Te.y = toBinary(Te.y);
+    Tr.y = toBinary(Tr.y);
+    fprintf('using binary prediction...\n');
+end
 
 clear idx mid;
 
@@ -67,8 +81,24 @@ rng(8339);  % fix seed, this    NN may be very sensitive to initialization
 
 % setup NN. The first layer needs to have number of features neurons,
 %  and the last layer the number of classes (here four).
-nn = nnsetup([size(Tr.X,2) 100 4]);
-opts.numepochs =  20;  %  Number of full sweeps through data
+if isBinary
+    nbOutput = 2;
+else
+    nbOutput = 4;
+end
+
+if isCNN
+    nbHidden = 100;
+else
+    nbHidden = 10;
+end
+
+nn = nnsetup([size(Tr.X,2) nbHidden nbOutput]);
+if isCNN
+    opts.numepochs =  20;  %  Number of full sweeps through data
+else
+    opts.numepochs =  40;  %  Number of full sweeps through data
+end
 opts.batchsize = 100;  %  Take a mean gradient step over this many samples
 
 % WARNING: numepochs or batchsize too big seems to overfit!
@@ -88,11 +118,15 @@ Tr.y = Tr.y(1:numSampToUse);
 [Tr.normX, mu, sigma] = zscore(Tr.X); % train, get mu and std
 
 % prepare labels for NN
-LL = [1*(Tr.y == 1), ...
-      1*(Tr.y == 2), ...
-      1*(Tr.y == 3), ...
-      1*(Tr.y == 4) ];  % first column, p(y=1)
-                        % second column, p(y=2), etc
+if isBinary
+    LL = [ 1*(Tr.y == 0), ... % either class 1, 2 or 3
+           1*(Tr.y == 1) ];   % class 4 only
+else
+    LL = [ 1*(Tr.y == 1), ... % first column, p(y=1)
+           1*(Tr.y == 2), ... % second column, p(y=2), etc
+           1*(Tr.y == 3), ...
+           1*(Tr.y == 4) ];
+end
 
 [nn, L] = nntrain(nn, Tr.normX, LL, opts);
 
@@ -112,15 +146,34 @@ nnPred = nn.a{end};
 
 % get the most likely class
 [~,classVote] = max(nnPred,[],2);
+if isBinary
+    classVote = classVote - 1; % map to {0, 1} and not {1, 2}
+end
 
 % get overall error [NOTE!! this is not the BER, you have to write the code
 %                    to compute the BER!]
-predErr = sum( classVote ~= Te.y ) / length(Te.y);
-fprintf('\nTesting error: %.2f%%\n\n', predErr * 100 );
+% predErr = sum( classVote ~= Te.y ) / length(Te.y);
+% fprintf('\nTesting error: %.2f%%\n\n', predErr * 100 );
 
 berErr = BER(Te.y, classVote);
-fprintf('\nBER Testing error: %.2f%%\n\n', berErr * 100 );
+if isBinary
+    fprintf('\nbinary BER Testing error: %.2f%%\n\n', berErr * 100);
+else
+    fprintf('\nmulticlass BER Testing error: %.2f%%\n\n', berErr * 100);
+end
 
+if isCNN
+    str = 'using CNN features';
+else
+    str = 'using HOG features';
+end
+figure('Name', str);
+subplot(121);
+imagesc(classVote); colorbar;
+title('predictions');
+subplot(122);
+imagesc(Te.y); colorbar;
+title('reality');
 
 %% visualize samples and their predictions (test set)
 figure;
