@@ -6,8 +6,8 @@
 % Organized in sections for convenience
 
 clearvars;
-addpath(genpath('data/train/'));
-load 'data/train/train.mat';
+addpath(genpath('data/'));
+load 'data/data.mat';
 
 % settings
 nbRuns = 5;
@@ -28,29 +28,29 @@ for r = 1:nbRuns
     fprintf(['run n°' num2str(r) '/' num2str(nbRuns) '\n']);
     
     % Split the data
-    N = size(train.y, 1);
+    N = size(data.yTrain, 1);
     splitIdx = floor(N * ratio);
 
     idx = randperm(N);
     idxTrain = idx(1:splitIdx);
     idxValid = idx(splitIdx + 1:end);
 
-    data.train.X.hog = train.X_hog(idxTrain, :);
-    data.train.X.cnn = train.X_cnn(idxTrain, :);
-    data.train.y = train.y(idxTrain); % train y are 4-class
+    tr.X.hog = data.hog.train.X(idxTrain, :);
+    tr.X.cnn = data.cnn.train.X(idxTrain, :);
+    tr.y = data.yTrain(idxTrain); % train y are 4-class
 
-    data.valid.X.hog = train.X_hog(idxValid, :);
-    data.valid.X.cnn = train.X_cnn(idxValid, :);
-    data.valid.y = toBinary(train.y(idxValid)); % valid y are binary
+    val.X.hog = data.hog.train.X(idxValid, :);
+    val.X.cnn = data.cnn.train.X(idxValid, :);
+    val.y = toBinary(data.yTrain(idxValid)); % valid y are binary
 
     % Run the methods
     for m = 1:length(methods2)
         method = methods2{m};
 
-        yPred = method(data.train, data.valid.X);
+        yPred = method(tr, val.X);
         
         % Compute the error
-        error2(r, m) = BER(yPred, data.valid.y);
+        error2(r, m) = BER(yPred, val.y);
     end
 end
 
@@ -65,29 +65,29 @@ error4 = zeros(nbRuns, length(methods4));
 
 for r = 1:nbRuns
     % Split the data
-    N = size(train.y, 1);
+    N = size(data.yTrain, 1);
     splitIdx = floor(N * ratio);
 
     idx = randperm(N);
     idxTrain = idx(1:splitIdx);
     idxValid = idx(splitIdx + 1:end);
 
-    data.train.X.hog = train.X_hog(idxTrain, :);
-    data.train.X.cnn = train.X_cnn(idxTrain, :);
-    data.train.y = train.y(idxTrain); % train y are 4-class
+    tr.X.hog = data.hog.train.X(idxTrain, :);
+    tr.X.cnn = data.cnn.train.X(idxTrain, :);
+    tr.y = data.yTrain(idxTrain); % train y are 4-class
 
-    data.valid.X.hog = train.X_hog(idxValid, :);
-    data.valid.X.cnn = train.X_cnn(idxValid, :);
-    data.valid.y = train.y(idxValid); % valid y are 4-class
+    val.X.hog = data.hog.train.X(idxValid, :);
+    val.X.cnn = data.cnn.train.X(idxValid, :);
+    val.y = data.yTrain(idxValid); % valid y are 4-class
 
     % Run the methods
     for m = 1:length(methods4)
         method = methods4{m};
 
-        yPred = method(data.train, data.valid.X);
+        yPred = method(tr, val.X);
         
         % Compute the errors
-        error4(r, m) = BER(yPred, data.valid.y);
+        error4(r, m) = BER(yPred, val.y);
     end
 end
 
