@@ -1,4 +1,6 @@
 function yPred = linSvmF2(X, y, XValid, C)
+%
+% Linear svm using a fixed C
     % Normalize data
     X = normalize(X);
     XValid = normalize(XValid);

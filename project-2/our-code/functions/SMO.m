@@ -1,4 +1,6 @@
 function [alphas, beta0] = SMO(K, y, C)
+%
+% Taken from the given code of the labo on svm
 %SMO: Implementation of Sequential Minimal Optimization
 
 % -------------------------------------

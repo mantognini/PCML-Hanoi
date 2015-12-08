@@ -1,4 +1,6 @@
 function yPred = linSvmHogCV2(train, XValid)
+%
+% Linear svm on hog feature using Cross-validation on C
     % Make y binary
     train.y = toBinary(train.y);
     

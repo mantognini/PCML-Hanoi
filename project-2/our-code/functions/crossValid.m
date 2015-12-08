@@ -1,4 +1,8 @@
 function [combiStar, errStar, errors] = crossValid(X, y, K, combi, modelFn, errFn)    
+%
+% K Cross-validation on different combinations of parameters using
+% a model and an error function
+% Each line of combi is a parameter combination to K-Fold
     % Define parts of the cake
     N = size(y, 1);
     idx = randperm(N);

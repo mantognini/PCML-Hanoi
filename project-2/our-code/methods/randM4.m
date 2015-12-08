@@ -1,4 +1,6 @@
 function yPred = randM4(train, XValid)
+%
+% Predict uniformly {1, 2, 3, 4}
     NValid = size(XValid.hog, 1);
     
     % random predictions

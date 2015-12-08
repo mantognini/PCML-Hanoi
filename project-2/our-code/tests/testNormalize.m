@@ -1,3 +1,4 @@
+%
 clear all;
 
 M = 10000; % nb of observations

@@ -1,4 +1,5 @@
 function K = rbfKernel(X1, X2, gamma)
+%
 % Radial Basis Function
 
     % Efficient way

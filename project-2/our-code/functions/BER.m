@@ -1,4 +1,5 @@
 function error = BER(y, yPred)
+%
 % Balanced Error Rate (BER)
     labels = unique(y);
     nbLabels = length(labels);
