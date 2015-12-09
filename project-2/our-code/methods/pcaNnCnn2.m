@@ -1,4 +1,4 @@
-function yPred = pcaNnCnn4(train, XValid)
+function yPred = pcaNnCnn2(train, XValid)
 %
 % Apply PCA followed by NN on CNN feature
 
@@ -11,6 +11,6 @@ function yPred = pcaNnCnn4(train, XValid)
     [TrNormZ, TeNormZ] = pcaHog(M, train, XValid);
 
     % Apply NN
-    yPred = nn(INNER_SIZE, EPOCHS, 0, TrNormZ, train.y, TeNormZ);
+    yPred = nn(INNER_SIZE, EPOCHS, 1, TrNormZ, train.y, TeNormZ);
 end
 

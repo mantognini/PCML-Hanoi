@@ -22,6 +22,7 @@ ratio = 0.7;
 methods2 = {
 %     @linSvmHogCV2,
     @pcaNnHog2,
+    @pcaNnCnn2,
     @randM2,
 };
 error2 = zeros(nbRuns, length(methods2));
