@@ -20,12 +20,13 @@ ratio = 0.7;
 % 0.30  0.04    @linSvmHogF2 C = 1
 % 0.23  0.05    @linSvmHogCV2 C* = 0.00023
 methods2 = {
-    @linSvmHogCV2;
-    };
+%     @linSvmHogCV2,
+    @randM2
+};
 error2 = zeros(nbRuns, length(methods2));
 
 for r = 1:nbRuns
-    fprintf(['run n°' num2str(r) '/' num2str(nbRuns) '\n']);
+    fprintf(['run n?' num2str(r) '/' num2str(nbRuns) '\n']);
     
     % Split the data
     N = size(data.yTrain, 1);
@@ -59,8 +60,9 @@ end
 % -------------------
 % 0.75          @randM4
 methods4 = {
-    @randM4
-    };
+    @randM4,
+    @pcaNnHog4,
+};
 error4 = zeros(nbRuns, length(methods4));
 
 for r = 1:nbRuns
