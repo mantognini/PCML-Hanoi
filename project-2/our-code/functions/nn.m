@@ -1,6 +1,10 @@
 function yPred = nn(innerSize, epochs, isBinary, TrX, Try, TeX)
 %
 % Apply NN on data
+%
+% Note
+%   Try is always multiclass but yPred can be binary when requested
+
     fprintf('[nn] Training NN & predicting classes...\n');
     addpath(genpath('toolboxs/DeepLearnToolbox-master/'));
     tnn = tic;
@@ -28,8 +32,8 @@ function yPred = nn(innerSize, epochs, isBinary, TrX, Try, TeX)
 
     % prepare labels for NN
     if isBinary
-        LL = [ 1*(Try == 0), ... % either class 1, 2 or 3
-               1*(Try == 1) ];   % class 4 only
+        LL = [ 1*(Try == 4), ... % class 4 only
+               1*(Try ~= 4) ];   % either class 1, 2 or 3
     else
         LL = [ 1*(Try == 1), ... % first column, p(y=1)
                1*(Try == 2), ... % second column, p(y=2), etc
@@ -47,6 +51,10 @@ function yPred = nn(innerSize, epochs, isBinary, TrX, Try, TeX)
     % predict on the test set
     nnPred = nn.a{end};
     [~, yPred] = max(nnPred, [], 2); % get the most probable class
+    
+    if isBinary
+        yPred = yPred - 1; % map {1, 2} to {0, 1}
+    end
 
     toc(tnn)
 end
