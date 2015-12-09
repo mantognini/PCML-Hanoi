@@ -40,6 +40,10 @@ for r = 1:nbRuns
 
     tr.X.hog = data.hog.train.X(idxTrain, :);
     tr.X.cnn = data.cnn.train.X(idxTrain, :);
+    tr.cnn.mu = data.cnn.mu;
+    tr.hog.mu = data.hog.mu;
+    tr.cnn.sigma = data.cnn.sigma;
+    tr.hog.sigma = data.hog.sigma;
     tr.y = data.yTrain(idxTrain); % train y are 4-class
 
     val.X.hog = data.hog.train.X(idxValid, :);
@@ -79,6 +83,10 @@ for r = 1:nbRuns
 
     tr.X.hog = data.hog.train.X(idxTrain, :);
     tr.X.cnn = data.cnn.train.X(idxTrain, :);
+    tr.cnn.mu = data.cnn.mu;
+    tr.hog.mu = data.hog.mu;
+    tr.cnn.sigma = data.cnn.sigma;
+    tr.hog.sigma = data.hog.sigma;
     tr.y = data.yTrain(idxTrain); % train y are 4-class
 
     val.X.hog = data.hog.train.X(idxValid, :);

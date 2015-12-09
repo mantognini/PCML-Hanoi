@@ -1,4 +1,4 @@
-function [TrNormZ, TeNormZ] = pcaCnn(M, train, XValid)
+function [TrZ, TeZ] = pcaCnn(M, train, XValid)
 %
 % Project data on the M more significant eigenvectors
 
@@ -9,10 +9,9 @@ function [TrNormZ, TeNormZ] = pcaCnn(M, train, XValid)
     % eigenvalues with value 0 and to find the non-zero eignevalues from a
     % different matrix.
     tic
-    [TrNormX, mu, sigma] = zscore(double(train.X.cnn));
-    TeNormX = normalize(double(XValid.cnn), mu, sigma);
-    N = size(TrNormX, 1);
-    X2 = TrNormX - ones(N, 1) * mu; % no longer sparse...
+    % NOTE: data is already normalised
+    N = size(train.X.cnn, 1);
+    X2 = double(train.X.cnn) - ones(N, 1) * double(train.cnn.mu); % no longer sparse...
     S = X2 * X2' / N;
     [Vm, Dm] = eigs(S, M); % the M largest eigenvectors
     lm = Dm(1:size(Dm,1)+1:end); % or Dm * ones(M, 1)
@@ -32,8 +31,8 @@ function [TrNormZ, TeNormZ] = pcaCnn(M, train, XValid)
 
     fprintf('[pcaCnn] Convert X to subspace of size M...\n');
     tic
-    TrNormZ = TrNormX * Um;
-    TeNormZ = TeNormX * Um;
+    TrZ = train.X.cnn * Um;
+    TeZ = XValid.cnn * Um;
     toc
     
 end

@@ -8,9 +8,9 @@ function yPred = pcaNnCnn4(train, XValid)
     EPOCHS     = 30;
 
     % Apply PCA
-    [TrNormZ, TeNormZ] = pcaCnn(M, train, XValid);
+    [TrZ, TeZ] = pcaCnn(M, train, XValid);
 
     % Apply NN
-    yPred = nn(INNER_SIZE, EPOCHS, 0, TrNormZ, train.y, TeNormZ);
+    yPred = nn(INNER_SIZE, EPOCHS, 0, TrZ, train.y, TeZ);
 end
 
