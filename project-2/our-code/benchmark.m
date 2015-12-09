@@ -18,12 +18,15 @@ ratio = 0.7;
 % -------------------
 % 0.5           @randM2
 % 0.30  0.04    @linSvmHogF2 C = 1
+% 0.25  0.02    @pcaNnHog2
 % 0.23  0.05    @linSvmHogCV2 C* = 0.00023
+% 0.104 0.01    @pcaNnCnn2
+% 0.084 0.009   @linSvmPcaCnnCV2
 methods2 = {
     @randM2,
 %     @linSvmHogCV2,
 %     @linSvmPcaHogCV2,
-    @linSvmPcaCnnCV2,
+%     @linSvmPcaCnnCV2,
 %     @pcaNnHog2,
 %     @pcaNnCnn2,
 };
@@ -60,6 +63,8 @@ for r = 1:nbRuns
         
         % Compute the error
         error2(r, m) = BER(yPred, val.y);
+        
+        pause(0.1); % so that plot can be displayed
     end
 end
 
@@ -105,6 +110,8 @@ for r = 1:nbRuns
         
         % Compute the errors
         error4(r, m) = BER(yPred, val.y);
+        
+        pause(0.1); % so that plot can be displayed
     end
 end
 
