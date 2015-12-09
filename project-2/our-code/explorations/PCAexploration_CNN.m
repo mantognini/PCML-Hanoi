@@ -331,11 +331,14 @@ end
 clear tmp i;
 toc
 
-fprintf('Training simple neural network...\n');
-
-% convert X to subspace of size M
+fprintf('convert X to subspace of size M');
+tic
 Tr.normZ = Tr.normX * Um;
 Te.normZ = Te.normX * Um;
+toc
+
+%%
+fprintf('Training simple neural network...\n');
 
 % Setup NN.
 inputSize  = M;
