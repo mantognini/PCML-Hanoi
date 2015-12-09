@@ -331,7 +331,7 @@ end
 clear tmp i;
 toc
 
-fprintf('convert X to subspace of size M');
+fprintf('convert X to subspace of size M...\n');
 tic
 Tr.normZ = Tr.normX * Um;
 Te.normZ = Te.normX * Um;

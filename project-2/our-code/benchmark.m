@@ -62,6 +62,7 @@ end
 methods4 = {
     @randM4,
     @pcaNnHog4,
+    @pcaNnCnn4,
 };
 error4 = zeros(nbRuns, length(methods4));
 
