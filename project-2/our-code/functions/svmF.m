@@ -8,10 +8,6 @@ function yPred = svmF(X, y, XValid, kernelFn, C, params)
         assert(nbParams == 1); % Limit to 1 parameter
     end
     
-    % Normalize data
-    X = normalize(X);
-    XValid = normalize(XValid);
-    
     % Binary train y {-1, 1}
     otherIdx = (y == 0);
     y(otherIdx) = -1;
