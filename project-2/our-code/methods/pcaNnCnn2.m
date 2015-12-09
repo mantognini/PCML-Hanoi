@@ -8,7 +8,7 @@ function yPred = pcaNnCnn2(train, XValid)
     EPOCHS     = 30;
 
     % Apply PCA
-    [TrNormZ, TeNormZ] = pcaHog(M, train, XValid);
+    [TrNormZ, TeNormZ] = pcaCnn(M, train, XValid);
 
     % Apply NN
     yPred = nn(INNER_SIZE, EPOCHS, 1, TrNormZ, train.y, TeNormZ);
