@@ -18,7 +18,7 @@ function [combiStar, errStar, errors] = crossValid(X, y, K, combi, modelFn, errF
     % for each parameter combination
     nbCombi = size(combi, 1);
     errors = zeros(nbCombi, 1);
-    for n = 1:nbCombi
+    parfor n = 1:nbCombi
         params = combi(n);
         error = zeros(K, 1);
         
