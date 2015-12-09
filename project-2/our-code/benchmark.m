@@ -21,7 +21,8 @@ ratio = 0.7;
 % 0.23  0.05    @linSvmHogCV2 C* = 0.00023
 methods2 = {
 %     @linSvmHogCV2,
-    @randM2
+    @pcaNnHog2,
+    @randM2,
 };
 error2 = zeros(nbRuns, length(methods2));
 
