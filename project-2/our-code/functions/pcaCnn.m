@@ -10,8 +10,10 @@ function [TrZ, TeZ] = pcaCnn(M, train, XValid)
     % different matrix.
     tic
     % NOTE: data is already normalised
-    N = size(train.X.cnn, 1);
-    X2 = double(train.X.cnn) - ones(N, 1) * double(train.cnn.mu); % no longer sparse...
+    TrX = double(train.X.cnn);
+    TeX = double(XValid.cnn);
+    N = size(TrX, 1);
+    X2 = TrX - ones(N, 1) * double(train.cnn.mu); % no longer sparse...
     S = X2 * X2' / N;
     [Vm, Dm] = eigs(S, M); % the M largest eigenvectors
     lm = Dm(1:size(Dm,1)+1:end); % or Dm * ones(M, 1)
@@ -31,8 +33,8 @@ function [TrZ, TeZ] = pcaCnn(M, train, XValid)
 
     fprintf('[pcaCnn] Convert X to subspace of size M...\n');
     tic
-    TrZ = train.X.cnn * Um;
-    TeZ = XValid.cnn * Um;
+    TrZ = TrX * Um;
+    TeZ = TeX * Um;
     toc
     
 end

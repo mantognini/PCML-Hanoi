@@ -22,13 +22,15 @@ ratio = 0.7;
 methods2 = {
     @randM2,
 %     @linSvmHogCV2,
-    @pcaNnHog2,
-    @pcaNnCnn2,
+%     @linSvmPcaHogCV2,
+    @linSvmPcaCnnCV2,
+%     @pcaNnHog2,
+%     @pcaNnCnn2,
 };
 error2 = zeros(nbRuns, length(methods2));
 
 for r = 1:nbRuns
-    fprintf(['run n?' num2str(r) '/' num2str(nbRuns) '\n']);
+    fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
     
     % Split the data
     N = size(data.yTrain, 1);
@@ -73,6 +75,8 @@ methods4 = {
 error4 = zeros(nbRuns, length(methods4));
 
 for r = 1:nbRuns
+    fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
+
     % Split the data
     N = size(data.yTrain, 1);
     splitIdx = floor(N * ratio);
