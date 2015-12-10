@@ -1,4 +1,4 @@
-function yPred = nn(innerSize, epochs, isBinary, TrX, Try, TeX)
+function yPred = nn(innerSize, learningRate, epochs, isBinary, TrX, Try, TeX)
 %
 % Apply NN on data
 %
@@ -22,7 +22,7 @@ function yPred = nn(innerSize, epochs, isBinary, TrX, Try, TeX)
     opts.numepochs  = epochs;
     opts.batchsize  = 100;
     opts.plot       = 0;      % silent training
-    nn.learningRate = 2;
+    nn.learningRate = learningRate;
 
     % this neural network implementation requires number of samples to be a
     % multiple of batchsize, so we remove some for this to be true.
