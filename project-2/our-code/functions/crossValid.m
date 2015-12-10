@@ -19,7 +19,7 @@ function [combiStar, errStar, errors] = crossValid(X, y, K, combi, modelFn, errF
     nbCombi = size(combi, 1);
     errors = zeros(nbCombi, 1);
     parfor n = 1:nbCombi
-        params = combi(n);
+        params = combi(n, :);
         error = zeros(K, 1);
         
         % K-Fold
