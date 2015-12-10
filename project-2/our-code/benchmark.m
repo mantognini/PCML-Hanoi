@@ -17,6 +17,8 @@ ratio = 0.7;
 % med   25-75   Method
 % -------------------
 % 0.5           @randM2
+% rbfSvmHogF2
+% 0.39  0.015   @rbfSvmHogF2 C = 0.00023, gamma = 1
 % 0.30  0.04    @linSvmHogF2 C = 1
 % 0.26  0.02    @nnHog2
 % 0.25  0.02    @pcaNnHog2
@@ -25,12 +27,13 @@ ratio = 0.7;
 % 0.104 0.01    @pcaNnCnn2
 % 0.084 0.009   @linSvmPcaCnnCV2
 methods2 = {
-    @randM2,
+%     @randM2,
 %     @linSvmHogCV2,
 %     @linSvmPcaHogCV2,
 %     @linSvmPcaCnnCV2,
 %     @pcaNnHog2,
 %     @pcaNnCnn2,
+    @(x, y) rbfSvmHogF2(x, y, 0.00023, 1),
 %     @nnHog2,
 %     @nnCnn2,
 };
@@ -78,8 +81,8 @@ end
 % 0.75          @randM4
 methods4 = {
     @randM4,
-    @pcaNnHog4,
-    @pcaNnCnn4,
+%     @pcaNnHog4,
+%     @pcaNnCnn4,
 };
 error4 = zeros(nbRuns, length(methods4));
 
