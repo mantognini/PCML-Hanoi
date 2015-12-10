@@ -13,18 +13,16 @@ function [TrZ, TeZ] = pcaCnn(M, train, XValid)
     TrX = double(train.X.cnn);
     TeX = double(XValid.cnn);
     N = size(TrX, 1);
-    X2 = TrX - ones(N, 1) * double(train.cnn.mu); % no longer sparse...
-    S = X2 * X2' / N;
+    S = TrX * TrX' / N;
     [Vm, Dm] = eigs(S, M); % the M largest eigenvectors
     lm = Dm(1:size(Dm,1)+1:end); % or Dm * ones(M, 1)
     toc
 
-    % Compute U's, i.e. eigenvector for X and not X2
     fprintf('[pcaCnn] Computing eigenvalues for original huge matrix...\n');
     tic
     norm = sqrt(N * lm)';
     % Um = tmp ./ norm;
-    tmp = X2' * Vm;
+    tmp = TrX' * Vm;
     Um = zeros(size(tmp));
     for i = 1:size(tmp, 2)
         Um(:, i) = tmp(:, i) ./ norm(i);
