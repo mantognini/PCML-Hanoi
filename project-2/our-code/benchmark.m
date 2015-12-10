@@ -7,6 +7,7 @@
 
 clearvars;
 addpath(genpath('data/'));
+addpath(genpath('our-code/'));
 load 'data/data.mat';
 
 % settings

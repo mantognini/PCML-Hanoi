@@ -4,7 +4,7 @@ function yPred = pcaNnHogCV2(train, XValid)
 
     % SETTINGS:
     M          = 500; % might be lower maybe
-    EPOCHS     = 20;
+    EPOCHS     = 150;
     
     % Apply PCA
     [TrZ, TeZ] = pcaHog(M, train, XValid);
@@ -14,14 +14,14 @@ function yPred = pcaNnHogCV2(train, XValid)
     myBER = @(y4, yPred2) BER(toBinary(y4), yPred2);
     
     % Find best inner layer size
-    innerSizes    = 10:10:100;
-    learningRates = 0.5:0.25:2.5;
+    innerSizes    = 10:5:150;
+    learningRates = 0.1:0.1:4;
     
     C = combine(innerSizes, learningRates);
     K = 2; % no k-folding with NN
     [CStar, ~, errors] = crossValid(TrZ, train.y, K, C, myNN, myBER);
     innerSizeStar    = CStar(1);
-    learningRateStar = CStart(2);
+    learningRateStar = CStar(2);
     
     % Predict
     yPred = nn(innerSizeStar, learningRateStar, EPOCHS, 1, TrZ, train.y, TeZ);
@@ -29,7 +29,9 @@ function yPred = pcaNnHogCV2(train, XValid)
     % Optionally
     % Plot the cross-validation
     figure('Name', 'Cross-valid, PCA HOG, NN, Binary');
-    contourf(innerSizes, learninRates, errors); colorbar;
+    contourf(innerSizes, learningRates, ...
+             reshape(errors, length(learningRates), length(innerSizes)));
+    colorbar;
     hold on;
     legend('ber error', 'Location', 'best');
     plot(innerSizeStar, learningRateStar, ...
