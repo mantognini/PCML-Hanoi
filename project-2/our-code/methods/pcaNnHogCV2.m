@@ -31,6 +31,7 @@ function yPred = pcaNnHogCV2(train, XValid)
     figure('Name', 'Cross-valid, PCA HOG, NN, Binary');
     contourf(innerSizes, learningRates, ...
              reshape(errors, length(learningRates), length(innerSizes)));
+    caxis([0.20 0.40]);
     colorbar;
     hold on;
     legend('ber error', 'Location', 'best');
