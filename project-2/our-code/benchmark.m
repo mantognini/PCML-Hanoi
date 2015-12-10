@@ -23,17 +23,18 @@ ratio = 0.7;
 % 0.26  0.02    @nnHog2
 % 0.25  0.02    @pcaNnHog2
 % 0.23  0.05    @linSvmHogCV2 C* = 0.00023
+% 0.18  0.01    @rbfSvmHogCV2 C* = 2, gamma* = 0.00023
 % 0.112 0.11    @nnCnn2
 % 0.104 0.01    @pcaNnCnn2
 % 0.084 0.009   @linSvmPcaCnnCV2
 methods2 = {
-%     @randM2,
+    @randM2,
 %     @linSvmHogCV2,
 %     @linSvmPcaHogCV2,
 %     @linSvmPcaCnnCV2,
 %     @pcaNnHog2,
 %     @pcaNnCnn2,
-    @(x, y) rbfSvmHogF2(x, y, 0.00023, 1),
+%     @rbfSvmHogCV2,
 %     @nnHog2,
 %     @nnCnn2,
 };
