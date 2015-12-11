@@ -27,7 +27,7 @@ ratio = 0.7;
 % 0.18  0.01    @rbfSvmHogCV2 C* = 2, gamma* = 0.00023
 % 0.112 0.11    @nnCnn2
 % 0.104 0.01    @pcaNnCnn2
-% 0.084 0.009   @linSvmPcaCnnCV2
+% 0.087 0.009   @linSvmPcaCnnCV2 C* = 0.00023, M* = 1300
 methods2 = {
     @randM2,
 %     @linSvmHogCV2,
