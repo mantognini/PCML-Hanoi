@@ -1,31 +1,28 @@
 function yPred = linSvmPcaCnnCV2(train, XValid)
 %
-% Linear svm on hog feature using Cross-validation on C
-
-    % SETTINGS:
-    M = 200; % might not be optimal
+% Linear svm on pca'd cnn using cross-validatoin for C, M
     
-    % Apply PCA
-    [TrZ, TeZ] = pcaCnn(M, train, XValid);
-
     % Make y binary
     train.y = toBinary(train.y);
     
-    % Find best C
-    C = linspace(0.00005, 0.0005, 20)';
-    [CStar, errStar, errors] = crossValid(TrZ, train.y, 10, C, @linSvmF2, @BER);
+    % Find best C, M combination
+    C = 0.00023;
+    M = floor(linspace(1200, 1400, 5));
+    params = combine(C, M);
+    f = @(X, y, XValid, params) svmPca2(X, y, XValid, params(2), @linearKernel, params(1), []);
+    [pStar, errStar, errors] = crossValid(train.X.cnn, train.y, 5, params, f, @BER);
     
     % Predict
-    yPred = linSvmF2(TrZ, train.y, TeZ, CStar);
+    yPred = f(train.X.cnn, train.y, XValid.cnn, pStar);
     
     % Optionally
     % Plot the cross-validation
-    figure('Name', 'Cross-valid, linear SVM, PCA CNN, Binary');
-    plot(C, errors, 'm-o');
+    figure('Name', 'linSvmPcaCnnCV2');
+    plot(M, errors, 'm-o');
     hold on;
     legend('ber error', 'Location', 'best');
-    plot(CStar, errStar, 'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
-    xlabel('C');
+    plot(pStar(2), errStar, 'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
+    xlabel('M');
     ylabel('BER');
     hold off;
     
