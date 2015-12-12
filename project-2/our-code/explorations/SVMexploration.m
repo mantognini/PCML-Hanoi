@@ -167,12 +167,35 @@ val.X.cnn = data.cnn.train.X(idxValid, :);
 val.y = data.yTrain(idxValid); % valid y are 4-class
 
 %% APPLY SVM CLASSIFICATION ON HOG FEATURES
-M = 100;
-[TrZ, TeZ] = pcaHog(M, tr, val.X);
+% M = 500;
+% [TrZ, TeZ] = pcaHog(M, tr, val.X);
+TrZ = tr.X.hog;
+TeZ = val.X.hog;
 
+%% TO BINARY
+tr.y = toBinary(tr.y);
+val.y = toBinary(val.y);
+
+%%
 fprintf('learning...\n');
 tic
-t = templateSVM();%'Verbose', 1);%, ...
+t = templateSVM('Solver', 'ISDA', ...
+                'KernelFunction', 'polynomial', 'PolynomialOrder', 3, ...
+                'KernelScale', 'auto', ...
+                'Verbose', 1);
+%'Verbose', 1);%, ...
+
+% On Full HOG matrice, for binary prediction:             BER
+% 'KernelFunction', 'linear', 'KernelScale', 'auto',    % -> 24%
+% 'KernelFunction', 'rbf', 'KernelScale', 'auto',       % -> 19%
+% 'KernelFunction', 'polynomial', 'PolynomialOrder', 2, % -> 23%
+% 'KernelFunction', 'polynomial', 'PolynomialOrder', 3, % -> 19%
+%                   idem + 'KernelScale', 'auto',       % -> 20%
+% 'KernelFunction', 'polynomial', 'PolynomialOrder', 5,
+%                          'KernelScale', 'auto',       % -> 19%
+% 'KernelFunction', 'polynomial', 'PolynomialOrder', 7,
+%                          'KernelScale', 'auto',       % -> 19%
+
 %                'SaveSupportVectors', true);
 % default: IterationLimit  = 1e6, GapTolerance = 1e-2, KernelFunction = ???
 %          Solver = SMO
