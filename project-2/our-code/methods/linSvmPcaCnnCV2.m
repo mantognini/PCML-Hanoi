@@ -6,8 +6,8 @@ function yPred = linSvmPcaCnnCV2(train, XValid)
     train.y = toBinary(train.y);
     
     % Find best C, M combination
-    C = 0.00023;
-    M = floor(linspace(1200, 1400, 5));
+    C = linspace(1, 4, 4) * 10^(-4);
+    M = 1300;
     params = combine(C, M);
     f = @(X, y, XValid, params) svmPca2(X, y, XValid, params(2), @linearKernel, params(1), []);
     [pStar, errStar, errors] = crossValid(train.X.cnn, train.y, 5, params, f, @BER);
