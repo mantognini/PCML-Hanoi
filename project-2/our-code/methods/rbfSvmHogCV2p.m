@@ -1,8 +1,8 @@
-function yPred = rbfSvmHogCV2(train, XValid)
+function yPred = rbfSvmHogCV2p(train, XValid, label)
 %
 % rbf svm on hog feature using Cross-validation on C, gamma
     % Make y binary
-    train.y = toBinary(train.y);
+    train.y = toBinary(train.y, label);
     
     % Find best C, gamma
     % gamma* range: 2 or 3
