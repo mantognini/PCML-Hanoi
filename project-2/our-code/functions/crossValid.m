@@ -3,22 +3,22 @@ function [combiStar, errStar, errors] = crossValid(X, y, K, combi, modelFn, errF
 % K Cross-validation on different combinations of parameters using
 % a model and an error function
 % Each line of combi is a parameter combination to K-Fold
-    % Check K
-    assert(K > 1);
 
-    % Define parts of the cake
-    N = size(y, 1);
-    idx = randperm(N);
-    Nk = floor(N / K);
-    idxCV = zeros(K, Nk);
-    for k = 1:K
-        idxCV(k, :) = idx(1 + (k - 1) * Nk : k * Nk);
+    if K > 1
+        % Define parts of the cake
+        N = size(y, 1);
+        idx = randperm(N);
+        Nk = floor(N / K);
+        idxCV = zeros(K, Nk);
+        for k = 1:K
+            idxCV(k, :) = idx(1 + (k - 1) * Nk : k * Nk);
+        end
     end
     
     % for each parameter combination
     nbCombi = size(combi, 1);
     errors = zeros(nbCombi, 1);
-    parfor n = 1:nbCombi
+    for n = 1:nbCombi
         params = combi(n, :);
         error = zeros(K, 1);
         
@@ -26,11 +26,20 @@ function [combiStar, errStar, errors] = crossValid(X, y, K, combi, modelFn, errF
         for k = 1:K
             fprintf(['param ' num2str(n) '/' num2str(nbCombi) ', fold ' num2str(k) '/' num2str(K) '\n']);
             
-            % compute indices
-            idxTe = idxCV(k, :);
-            idxTr = idxCV([1:k-1 k+1:end], :);
-            idxTr = idxTr(:);
-            
+            if k == 1
+                N = size(y, 1);
+                splitIdx = floor(N * 0.7);
+
+                idx = randperm(N);
+                idxTr = idx(1:splitIdx);
+                idxTe = idx(splitIdx + 1:end);
+            else
+                % compute indices
+                idxTe = idxCV(k, :);
+                idxTr = idxCV([1:k-1 k+1:end], :);
+                idxTr = idxTr(:);
+            end
+
             % compute data
             XTr = X(idxTr, :);
             yTr = y(idxTr);
