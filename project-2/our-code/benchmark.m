@@ -28,14 +28,16 @@ ratio = 0.7;
 % 0.112 0.11    @nnCnn2
 % 0.104 0.01    @pcaNnCnn2
 % 0.087 0.009   @linSvmPcaCnnCV2 C* = 0.00023, M* = 1300
+% 0.082 0.011   @rbfSvmPcaCnnCV2 C* = 0.00023, M* = 150, gamma = 3.25
 methods2 = {
     @randM2,
 %     @linSvmHogCV2,
+%     @rbfSvmHogCV2,
 %     @linSvmPcaHogCV2,
 %     @linSvmPcaCnnCV2,
+%     @rbfSvmPcaCnnCV2
 %     @pcaNnHog2,
 %     @pcaNnCnn2,
-%     @rbfSvmHogCV2,
 %     @nnHog2,
 %     @nnCnn2,
 };
@@ -127,10 +129,10 @@ end
 %% Plotting scores
 figure('Name', 'BER');
 
-subplot(1, 2, 1);
+% subplot(1, 2, 1);
 labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
 boxplot(error2, 'labels', labels2);
 
-subplot(1, 2, 2);
-labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
-boxplot(error4, 'labels', labels4);
+% subplot(1, 2, 2);
+% labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
+% boxplot(error4, 'labels', labels4);
