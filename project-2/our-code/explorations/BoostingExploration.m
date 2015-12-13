@@ -89,7 +89,7 @@ MdlSV1 = fitcecoc(tr1.X.hog, toBinary(tr1.y, 1), 'Learners', t, 'Options', opts)
 [y1Pred, yf1] = predict(MdlSV1, tr2.X.hog);
 [~, valyf1] = predict(MdlSV1, val.X.hog);
 ber1 = BER(toBinary(tr2.y, 1), y1Pred)
-% -> 0.1603
+% -> 0.16
 
 %%
 % fprintf('class 2...\n');
@@ -123,7 +123,7 @@ MdlSV2 = fitcecoc(tr1.X.hog, toBinary(tr1.y, 2), 'Learners', t, 'Options', opts)
 [y2Pred, yf2] = predict(MdlSV2, tr2.X.hog);
 [~, valyf2] = predict(MdlSV2, val.X.hog);
 ber2 = BER(toBinary(tr2.y, 2), y2Pred)
-% -> 0.1257
+% -> 0.12
 
 %%
 % fprintf('class 3...\n');
@@ -145,29 +145,47 @@ MdlSV3 = fitcecoc(tr1.X.hog, toBinary(tr1.y, 3), 'Learners', t, 'Options', opts)
 [y3Pred, yf3] = predict(MdlSV3, tr2.X.hog);
 [~, valyf3] = predict(MdlSV3, val.X.hog);
 ber3 = BER(toBinary(tr2.y, 3), y3Pred)
-% -> 0.2096
+% -> 0.21
 
 
 %% Train a decision tree ensemble using AdaBoost
 
 % figure; histogram(yf1); hold on; histogram(yf2); histogram(yf3); hold off;
 features = [yf1, yf2, yf3];
-finalData = toBinary(tr2.y); % default binary
+finalData = tr2.y;
 
 tic
-ClassTreeEns = fitensemble(features, finalData, 'AdaBoostM1', 10, 'Tree');
+ClassTreeEns = fitensemble(features, finalData, 'AdaBoostM2', 200, 'Tree');
+% -> BER = 0.24
+% ClassTreeEns = fitensemble(features, finalData, 'LPBoost', 80, 'Tree');
+% -> BER = 0.73 XXXX :-( XXXX
+% ClassTreeEns = fitensemble(features, finalData, 'TotalBoost', 50, 'Tree');
+% -> BER = 0.60 XXXX :-( XXXX
+% ClassTreeEns = fitensemble(features, finalData, 'RUSBoost', 200, 'Tree');
+% -> BER = 0.36
+
+% NOTE: LPBoost and TotalBoost are supposed to be optimised versions...
+%       Thank you Matlab!
 toc
 
-%% Determine the cumulative resubstitution losses
+% Determine the cumulative resubstitution losses
 figure;
 rsLoss = resubLoss(ClassTreeEns, 'Mode', 'Cumulative');
 plot(rsLoss);
 xlabel('Number of Learning Cycles');
 ylabel('Resubstitution Loss');
 
-%%
+%
 valdata = [valyf1, valyf2, valyf3];
 yPred = predict(ClassTreeEns, valdata);
-ber = BER(toBinary(val.y), yPred)
+ber = BER(val.y, yPred)
+% with AdaBoostM2 -> BER = 0.24
 
+%% Baseline: use multiclass classifier without boosting
 
+t = templateSVM('KernelFunction', 'rbf', 'KernelScale', 'auto', 'Verbose', 1);
+opts = statset('UseParallel', 1);
+MdlSV = fitcecoc(tr1.X.hog, tr1.y, 'Learners', t, 'Options', opts);
+yPred = predict(MdlSV, val.X.hog);
+ber = BER(val.y, yPred)
+% -> BER = 0.23
