@@ -11,7 +11,7 @@ addpath(genpath('our-code/'));
 load 'data/data.mat';
 
 % settings
-nbRuns = 5;
+nbRuns = 10;
 ratio = 0.7;
 
 %% Evaluating binary methods
@@ -28,9 +28,9 @@ ratio = 0.7;
 % 0.112 0.11    @nnCnn2
 % 0.104 0.01    @pcaNnCnn2
 % 0.087 0.009   @linSvmPcaCnnCV2 C* = 0.00023, M* = 1300
-% 0.082 0.011   @rbfSvmPcaCnnCV2 C* = 0.00023, M* = 150, gamma = 3.25
+% 0.081 0.008   @rbfSvmPcaCnnF2 C* = 3.25, M* = 150, gamma = 0.00023
 methods2 = {
-    @randM2,
+%     @randM2,
 %     @linSvmHogCV2,
 %     @rbfSvmHogCV2,
 %     @linSvmPcaHogCV2,
