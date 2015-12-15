@@ -27,6 +27,7 @@ ratio = 0.7;
 % 0.18  0.01    @rbfSvmHogCV2 C* = 2, gamma* = 0.00023
 % 0.112 0.11    @nnCnn2
 % 0.104 0.01    @pcaNnCnn2
+% 0.089 0.008   @svmHogCnnMC   
 % 0.087 0.009   @linSvmPcaCnnCV2 C* = 0.00023, M* = 1300
 % 0.081 0.008   @rbfSvmPcaCnnF2 C* = 3.25, M* = 150, gamma = 0.00023
 methods2 = {
@@ -40,6 +41,7 @@ methods2 = {
 %     @pcaNnCnn2,
 %     @nnHog2,
 %     @nnCnn2,
+    @svmHogCnnMC
 };
 error2 = zeros(nbRuns, length(methods2));
 
