@@ -11,6 +11,6 @@ function yPred = svmHogCnnKNN2(train, XValid)
     
     % Predict
     combF = @(X, y, XValid) knnComb(X, y, XValid, 5);
-    yPred = multiPred(train.X, train.y, XValid, 0.7, {m1, m2}, combF);
+    yPred = multiPred(train.X, train.y, XValid, 10, 0.95, {m1, m2}, combF);
     
 end
