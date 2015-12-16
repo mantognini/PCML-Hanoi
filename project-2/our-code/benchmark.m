@@ -31,6 +31,7 @@ ratio = 0.7;
 % 0.089 0.008   @svmHogCnnMC2  
 % 0.087 0.009   @linSvmPcaCnnCV2 C* = 0.00023, M* = 1300
 % 0.081 0.008   @rbfSvmPcaCnnF2 C* = 3.25, M* = 150, gamma = 0.00023
+% 0.079 0.004   @svmHogCnnCustom2
 methods2 = {
 %     @randM2,
 %     @linSvmHogCV2,
@@ -43,7 +44,8 @@ methods2 = {
 %     @nnHog2,
 %     @nnCnn2,
 %     @svmHogCnnMC2
-    @svmHogCnnKNN2
+%     @svmHogCnnKNN2
+    @svmHogCnnCustom2
 };
 error2 = zeros(nbRuns, length(methods2));
 
