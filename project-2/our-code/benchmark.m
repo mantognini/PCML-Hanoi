@@ -58,7 +58,9 @@ end
 
 %% Evaluating multi-class methods
 methods4 = {
-    @randM4
+    @randM4,
+%     @pcaNnHog4,
+%     @pcaNnCnn4,
 };
 error4 = zeros(nbRuns, length(methods4));
 
@@ -98,14 +100,12 @@ for r = 1:nbRuns
     end
 end
 
-%% Plotting scores
-figure('Name', 'BER');
-
-% subplot(1, 2, 1);
+%% Plotting BINARY scores
+figure('Name', 'BER BINARY');
 labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
 boxplot(error2, 'labels', labels2);
-ylim([0 0.15]);
 
-% subplot(1, 2, 2);
-% labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
-% boxplot(error4, 'labels', labels4);
+%% Plotting MULTICLASS scores
+figure('Name', 'BER MULTICLASS');
+labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
+boxplot(error4, 'labels', labels4);
