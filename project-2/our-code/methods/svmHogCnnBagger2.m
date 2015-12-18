@@ -1,4 +1,4 @@
-function yPred = svmHogCnnForest2(train, XValid)
+function yPred = svmHogCnnBagger2(train, XValid)
 %
 % Apply svm to both hog and cnn and forest decision
 
