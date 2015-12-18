@@ -22,9 +22,8 @@ methods2 = {
 };
 error2 = zeros(nbRuns, length(methods2));
 
+ticId = ticStatus('Evaluating binary methods');
 for r = 1:nbRuns
-    fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
-    
     % Split the data
     N = size(data.yTrain, 1);
     splitIdx = floor(N * ratio);
@@ -56,6 +55,8 @@ for r = 1:nbRuns
         
         pause(0.1); % so that plot can be displayed
     end
+    
+    tocStatus(ticId, r / nbRuns);
 end
 
 % Plotting BINARY scores
