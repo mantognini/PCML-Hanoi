@@ -252,6 +252,7 @@ trLabelPredSvmCnn2 = [];
 valScoreSvmCnn2 = [];
 valLabelPredSvmCnn2 = [];
 berSvmCnn2 = zeros(4, 0);
+berValSvmCnn2 = zeros(4, 0);
 for category = 1:4
     model = fitcecoc(Tr1Z, toBinary(tr1.y, category), ...
                      'Learners', svmDefault, 'Options', opts);
@@ -261,6 +262,7 @@ for category = 1:4
     
     % THIS SHOULD NOT BE DONE IN PRACTICE!!
     berSvmCnn2(category) = BER(toBinary(tr2.y, category), trLabelPredSvmCnn2cat);
+    berValSvmCnn2(category) = BER(toBinary(val.y, category), valLabelPredSvmCnn2cat);
     
     % keep track of the predictions for this category
     trLabelPredSvmCnn2 = [trLabelPredSvmCnn2, trLabelPredSvmCnn2cat];
@@ -272,6 +274,7 @@ for category = 1:4
 end
 
 fprintf(['SVM BINARY CNN BER = ' num2str(berSvmCnn2) '\n']);
+fprintf(['SVM VAL BINARY CNN BER = ' num2str(berValSvmCnn2) '\n']);
 
 
 % %%
@@ -349,8 +352,10 @@ fprintf(['FOREST CNN BER = ' num2str(berForestCnn) '\n']);
 %%
 % Combine stuff together
 
-trScores  = [trScoreSvmHog2,  trScoreSvmHog4,  trScoreSvmCnn2,  trScoreSvmCnn4,  trScoreTreeHog4,  trScoreTreeCnn4,  trLabelPredForestHog4,  trLabelPredForestCnn4];
-valScores = [valScoreSvmHog2, valScoreSvmHog4, valScoreSvmCnn2, valScoreSvmCnn4, valScoreTreeHog4, valScoreTreeCnn4, valLabelPredForestHog4, valLabelPredForestCnn4];
+% trScores  = [trScoreSvmHog2,  trScoreSvmHog4,  trScoreSvmCnn2,  trScoreSvmCnn4,  trScoreTreeHog4,  trScoreTreeCnn4,  trLabelPredForestHog4,  trLabelPredForestCnn4];
+% valScores = [valScoreSvmHog2, valScoreSvmHog4, valScoreSvmCnn2, valScoreSvmCnn4, valScoreTreeHog4, valScoreTreeCnn4, valLabelPredForestHog4, valLabelPredForestCnn4];
+trScores  = [trScoreSvmCnn2];
+valScores = [valScoreSvmCnn2];
 
 
 %%
@@ -426,7 +431,7 @@ fprintf(['CTree on extracted features: BER = ' num2str(berCtree) '\n']);
 
 forestOpts.M = 30; % # trees to train
 forest = forestTrain(trScores, tr2.y, forestOpts);
-[yPredForest, yScroreForest] = forestApply(valScores, forest);
+[yPredForest, yScroreForest] = forestApply(single(valScores), forest);
 berForest = BER(val.y, yPredForest);
 fprintf(['Forest on extracted features: BER = ' num2str(berForest) '\n']);
 

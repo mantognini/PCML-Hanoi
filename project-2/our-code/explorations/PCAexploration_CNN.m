@@ -263,8 +263,8 @@ load 'data/train/train.mat';
 train.X_cnn = sparse(double(train.X_cnn));
 
 % SETTINGS:
-M = 200;
-ratio = 0.7;
+M = 150;
+ratio = 0.9;
 
 % IMPLEMENTATION
 tstart = tic;
@@ -336,6 +336,10 @@ tic
 Tr.normZ = Tr.normX * Um;
 Te.normZ = Te.normX * Um;
 toc
+
+%%
+TrData = [double(toBinary(Tr.y, 1)), Tr.normZ];
+TeData = [double(toBinary(Te.y, 1)), Te.normZ];
 
 %%
 fprintf('Training simple neural network...\n');
