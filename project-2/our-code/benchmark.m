@@ -10,9 +10,12 @@ addpath(genpath('data/'));
 addpath(genpath('our-code/'));
 load 'data/data.mat';
 
+%%
+
 % settings
 nbRuns = 5;
 ratio = 0.7;
+category = 1; % for binary mapping
 
 %% Evaluating binary methods
 methods2 = {
@@ -41,13 +44,13 @@ for r = 1:nbRuns
 
     val.X.hog = data.hog.train.X(idxValid, :);
     val.X.cnn = data.cnn.train.X(idxValid, :);
-    val.y = toBinary(data.yTrain(idxValid)); % valid y are binary
+    val.y = toBinary(data.yTrain(idxValid), category); % valid y are binary
 
     % Run the methods
     for m = 1:length(methods2)
         method = methods2{m};
 
-        yPred = method(tr, val.X);
+        yPred = method(tr, val.X, category);
         
         % Compute the error
         error2(r, m) = BER(yPred, val.y);
@@ -104,6 +107,7 @@ end
 figure('Name', 'BER BINARY');
 labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
 boxplot(error2, 'labels', labels2);
+title(['category = ' num2str(category)]);
 
 %% Plotting MULTICLASS scores
 figure('Name', 'BER MULTICLASS');
