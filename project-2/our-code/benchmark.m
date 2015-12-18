@@ -71,6 +71,7 @@ methods4 = {
     @randM4,
 %     @pcaNnHog4,
 %     @pcaNnCnn4,
+%     @rbfSvmPcaCnnManualTree4
 };
 error4 = zeros(nbRuns, length(methods4));
 
