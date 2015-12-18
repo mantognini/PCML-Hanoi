@@ -10,12 +10,11 @@ addpath(genpath('data/'));
 addpath(genpath('our-code/'));
 load 'data/data.mat';
 
-%%
-
-% settings
+%% settings
 nbRuns = 5;
 ratio = 0.7;
 category = 1; % for binary mapping
+
 
 %% Evaluating binary methods
 methods2 = {
@@ -58,6 +57,13 @@ for r = 1:nbRuns
         pause(0.1); % so that plot can be displayed
     end
 end
+
+% Plotting BINARY scores
+figure('Name', 'BER BINARY');
+labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
+boxplot(error2, 'labels', labels2);
+title(['category = ' num2str(category)]);
+
 
 %% Evaluating multi-class methods
 methods4 = {
@@ -103,13 +109,7 @@ for r = 1:nbRuns
     end
 end
 
-%% Plotting BINARY scores
-figure('Name', 'BER BINARY');
-labels2 = cellfun(@func2str, methods2, 'UniformOutput', false);
-boxplot(error2, 'labels', labels2);
-title(['category = ' num2str(category)]);
-
-%% Plotting MULTICLASS scores
+% Plotting MULTICLASS scores
 figure('Name', 'BER MULTICLASS');
 labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
 boxplot(error4, 'labels', labels4);
