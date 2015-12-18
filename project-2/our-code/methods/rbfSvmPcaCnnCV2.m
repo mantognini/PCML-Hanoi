@@ -1,18 +1,17 @@
-function yPred = rbfSvmPcaCnnCV2(train, XValid)
+function yPred = rbfSvmPcaCnnCV2(train, XValid, category)
 %
 % Rbf svm on pca'd cnn using cross-validatoin for C, M
     
     % Make y binary
-    train.y = toBinary(train.y);
+    train.y = toBinary(train.y, category);
     
     % Find best C, M combination
     % C = 3.25, 150
-    C = linspace(2.5, 4, 5)';
-    M = [25, 50, 75];
-    params = combine(C, M);
-    
-    gamma = 0.00023;
-    f = @(X, y, XValid, params) svmPca2(X, y, XValid, params(2), @rbfKernel, params(1), gamma);
+    C = [8 10 12];%linspace(2.5, 4, 5)';
+    M = 150;
+    gammas = [1e-4 5e-4 10e-4];
+    params = combine(C, gammas);
+    f = @(X, y, XValid, params) svmPca2(X, y, XValid, M, @rbfKernel, params(1), params(2));
     [pStar, errStar, errors] = crossValid(train.X.cnn, train.y, 1, params, f, @BER);
     
     % Predict
@@ -21,12 +20,12 @@ function yPred = rbfSvmPcaCnnCV2(train, XValid)
     % Optionally
     % Plot the cross-validation
     figure('Name', 'rbf-cnn-cv2');
-    contourf(M, C, reshape(errors, length(C), length(M))); colorbar;
+    contourf(gammas, C, reshape(errors, length(C), length(gammas))); colorbar;
     hold on;
     legend('ber error', 'Location', 'best');
     plot(pStar(2), pStar(1), ...
          'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
-    xlabel('M');
+    xlabel('gamma');
     ylabel('C');
     hold off;
     
