@@ -48,10 +48,11 @@ errScoresHog = yPredHog(errIdxHog);
 errScoresCnn = yPredHog(errIdxCnn);
 
 % Plot
+nb = 10;
 figure('Name', 'errors vs confidence');
-histogram(errScoresHog, 20);
+histogram(errScoresHog, nb);
 hold on;
-histogram(errScoresCnn, 20);
+histogram(errScoresCnn, nb);
 legend({'hog', 'cnn'});
 hold off;
 

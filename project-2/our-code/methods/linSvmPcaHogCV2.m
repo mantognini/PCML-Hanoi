@@ -1,4 +1,4 @@
-function yPred = linSvmPcaHogCV2(train, XValid)
+function yPred = linSvmPcaHogCV2(train, XValid, category)
 %
 % Linear svm on hog feature using Cross-validation on C
 
@@ -9,7 +9,7 @@ function yPred = linSvmPcaHogCV2(train, XValid)
     [TrZ, TeZ] = pcaHog(M, train, XValid);
 
     % Make y binary
-    train.y = toBinary(train.y);
+    train.y = toBinary(train.y, category);
     
     % Find best C
     C = linspace(0.00005, 0.0005, 20)';
