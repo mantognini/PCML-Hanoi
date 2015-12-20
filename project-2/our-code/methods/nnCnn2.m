@@ -1,4 +1,4 @@
-function yPred = nnCnn2(train, XValid)
+function yPred = nnCnn2(train, XValid, ~)
 %
 % Simply apply NN on HOG feature for binary discrimination
 

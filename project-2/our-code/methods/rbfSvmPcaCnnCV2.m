@@ -7,12 +7,12 @@ function yPred = rbfSvmPcaCnnCV2(train, XValid, category)
     
     % Find best C, M combination
     % C = 3.25, 150
-    C = [8 10 12];%linspace(2.5, 4, 5)';
+    C = [8 9 10 11 12];
     M = 150;
-    gammas = [1e-4 5e-4 10e-4];
+    gammas = [1e-4 1.5e-4 2e-4 2.5e-4 3e-4];
     params = combine(C, gammas);
     f = @(X, y, XValid, params) svmPca2(X, y, XValid, M, @rbfKernel, params(1), params(2));
-    [pStar, errStar, errors] = crossValid(train.X.cnn, train.y, 1, params, f, @BER);
+    [pStar, errStar, errors] = crossValid(train.X.cnn, train.y, 10, params, f, @BER);
     
     % Predict
     yPred = f(train.X.cnn, train.y, XValid.cnn, pStar);

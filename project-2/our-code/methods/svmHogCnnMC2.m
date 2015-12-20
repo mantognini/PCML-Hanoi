@@ -1,9 +1,9 @@
-function yPred = svmHogCnnMC(train, XValid)
+function yPred = svmHogCnnMC2(train, XValid, category)
 %
 % Apply svm to both hog and cnn with maximum confidence (MC) voting
 
     % Make y binary
-    train.y = toBinary(train.y);
+    train.y = toBinary(train.y, category);
     
     % Cnn
     M = 150;

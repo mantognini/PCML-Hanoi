@@ -11,14 +11,26 @@ addpath(genpath('our-code/'));
 load 'data/data.mat';
 
 %% settings
-nbRuns = 5;
+nbRuns = 1;
 ratio = 0.7;
-category = 1; % for binary mapping
+category = 4; % for binary mapping
 
 
 %% Evaluating binary methods
 methods2 = {
-    @randM2
+%     @logRegHog2, % 1
+%     @nnHog2, % 2
+%     @(x, y, c) linSvmHogF2(x, y, c, 0.00023), % 3
+%     @(x, y, c) rbfSvmHogF2(x, y, c, 2, 0.00023), % 4
+%     @nnCnn2, % 5
+%     @logRegCnn2, % 6
+%     @svmHogCnnMC2,
+%     @cnnForestF2,
+%     @(x, y, c) linSvmPcaCnnF2(x, y, c, 0.00023, 1300), % 7
+%     @(x, y, c) rbfSvmPcaCnnF2(x, y, c, 150, 3.25, 0.00023) % 8
+
+
+    @rbfSvmPcaCnnCV2
 };
 error2 = zeros(nbRuns, length(methods2));
 
