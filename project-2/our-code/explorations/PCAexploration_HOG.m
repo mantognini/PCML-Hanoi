@@ -94,9 +94,37 @@ figure('Name', 'Distortion Measure');
 plot(Jm, 'LineWidth', 4);
 xlabel('M');
 ylabel('J');
+ylim([0 Jm(1)]);
+xlim([0 D]);
 title('distortion J vs M');
 
-clear Jm m;
+
+%% Compute energy loss
+
+rm = zeros(D, 1);
+for m = 1:D
+    rm(m) = 1 - sum(l(1:m)) / sum(l);
+end
+okays = find(rm < 0.1);
+okay = okays(1);
+
+figure('Name', 'Distortion Measure');
+plot(rm, 'LineWidth', 4); hold on;
+plot(okay, rm(okay), 'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
+xlabel('M');
+ylabel('energy loss (%)');
+title('Energy loss for HOG');
+
+% clear Jm m rm okays okay;
+
+%%
+% ticId = ticStatus();
+% diff = zeros(10, 1);%D, 1);
+% for m = 1:10%D
+%     Xt = z(:, 1:m) * U(:, 1:m)' + ones(N, 1) * b(m+1:D) * U(:, m+1:D)';
+%     diff(m) = mean(mean(abs(Xt - X)));
+%     tocStatus(ticId, m/10);%D);
+% end
 
 %%
 % M = 1000 seems a good upper bound value but something smaller might
@@ -112,10 +140,23 @@ M = 1000;
 % Xt = Xtz + ones(N, 1) * Xtb;
 Xt = z(:, 1:M) * U(:, 1:M)' + ones(N, 1) * b(M+1:D) * U(:, M+1:D)';
 
-figure;
-diff = log(abs(X - Xt));
-diff = sort(sort(diff)');
-imagesc(diff); colorbar;
+
+%% Display lose of information for a given image
+
+% show lose of information, regroup error of the same magnitude together
+fprintf('Preparing data...\n');
+tic
+diff = abs(X - Xt);
+diff = sort(diff);
+diff = sort(diff');
+% diff = log(diff);
+upperBound = max(max(diff));
+toc
+
+imagesc(diff);
+title(['M = ' num2str(M)]); colormap 'default';
+colorbar;
+caxis([0 upperBound]);
 
 %% Display lose of information for a given image
 addpath(genpath('toolboxs/piotr/'));

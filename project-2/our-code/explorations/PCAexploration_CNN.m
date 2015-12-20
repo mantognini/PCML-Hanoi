@@ -12,7 +12,7 @@ tic
 Tr = [];
 Te = [];
 
-ratio = 0.7;
+ratio = 0.99;
 
 idx = randperm(size(train.X_cnn,1));
 mid = floor(length(idx) * ratio);
@@ -27,8 +27,8 @@ Te.idxs = idx(mid+1:end);
 Te.X = Xtmp(Te.idxs,:);
 Te.y = train.y(Te.idxs);
 
-[Tr.normX, mu, sigma] = zscore(Tr.X);
-Te.normX = normalize(Te.X, mu, sigma);
+[Tr.normX, mu, sigma] = zscore(full(Tr.X));
+Te.normX = normalize(full(Te.X), mu, sigma);
 
 clear idx mid ratio Xtmp;
 toc
@@ -109,9 +109,27 @@ figure('Name', 'Distortion Measure');
 plot(Jm, 'LineWidth', 4);
 xlabel('M');
 ylabel('J');
+ylim([0 Jm(1)]);
+xlim([0 N]);
 title('distortion J vs M');
 
-clear Jm m;
+%% Compute energy loss
+
+rm = zeros(N, 1);
+for m = 1:N
+    rm(m) = 1 - sum(l(1:m)) / sum(l);
+end
+okays = find(rm < 0.1);
+okay = okays(1);
+
+figure('Name', 'Distortion Measure');
+plot(rm, 'LineWidth', 4); hold on;
+plot(okay, rm(okay), 'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
+xlabel('M');
+ylabel('energy loss (%)');
+title('Energy loss for CNN');
+
+% clear Jm m rm okays okay;
 
 %%
 % Upper bound value for M is not as clearly identifyable as with HOG.
