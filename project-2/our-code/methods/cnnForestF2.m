@@ -10,6 +10,6 @@ function yPred = cnnForestF2(train, XValid, category)
     ops.maxDepth = 7;
     
     % Make y {1, 2} (Piotr needs it)
-    yPred = forestComb2([train.X.cnn train.X.hog], train.y + 1, [XValid.cnn XValid.hog], ops) - 1; 
+    yPred = forestComb2(train.X.cnn, train.y + 1, XValid.cnn, ops) - 1; 
    
 end

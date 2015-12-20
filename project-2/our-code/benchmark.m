@@ -20,7 +20,7 @@ category = 4; % for binary mapping
 %% Evaluating binary methods
 methods2 = {
     { 'log Reg HOG', @logRegHog2 }, % 1
-    { 'RF HOG + CNN', @cnnForestF2 }, %2
+    { 'RF CNN', @cnnForestF2 }, %2
     { 'NN HOG', @nnHog2 }, % 3
     { 'lin SVM HOG', @(x, y, c) linSvmHogF2(x, y, c, 0.00023) }, % 4
     { 'rbf SVM HOG', @(x, y, c) rbfSvmHogF2(x, y, c, 2, 0.00023) }, % 5
