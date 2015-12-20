@@ -7,8 +7,8 @@ function yPred = nnCnn2(train, XValid, category)
     end
 
     % SETTINGS:
-    INNER_SIZE = 100;
-    EPOCHS     = 30;
+    INNER_SIZE = 20;
+    EPOCHS     = 20;
 
     % Apply NN
     yPred = nn(INNER_SIZE, 2, EPOCHS, 1, train.X.cnn, train.y, XValid.cnn);

@@ -8,10 +8,11 @@
 clearvars;
 addpath(genpath('data/'));
 addpath(genpath('our-code/'));
+addpath(genpath('toolboxs/'));
 load 'data/data.mat';
 
 %% settings
-nbRuns = 1;
+nbRuns = 20;
 ratio = 0.7;
 category = 4; % for binary mapping
 
@@ -19,21 +20,24 @@ category = 4; % for binary mapping
 %% Evaluating binary methods
 methods2 = {
     { 'log Reg HOG', @logRegHog2 }, % 1
-    { 'NN HOG', @nnHog2 }, % 2
-    { 'lin SVM HOG', @(x, y, c) linSvmHogF2(x, y, c, 0.00023) }, % 3
-    { 'rbf SVM HOG', @(x, y, c) rbfSvmHogF2(x, y, c, 2, 0.00023) }, % 4
-    { 'NN CNN', @nnCnn2 }, % 5
-    { 'log reg CNN', @logRegCnn2 }, % 6
-    { 'rbf SVM HOG + CNN MC', @svmHogCnnMC2 },
-    { 'RF HOG + CNN', @cnnForestF2 },
-    { 'lin SVM CNN', @(x, y, c) linSvmPcaCnnF2(x, y, c, 0.00023, 1300) }, % 7
-    { 'rbf SVM CNN', @(x, y, c) rbfSvmPcaCnnF2(x, y, c, 150, 3.25, 0.00023) } % 8
+    { 'RF HOG + CNN', @cnnForestF2 }, %2
+    { 'NN HOG', @nnHog2 }, % 3
+    { 'lin SVM HOG', @(x, y, c) linSvmHogF2(x, y, c, 0.00023) }, % 4
+    { 'rbf SVM HOG', @(x, y, c) rbfSvmHogF2(x, y, c, 2, 0.00023) }, % 5
+    { 'NN CNN', @nnCnn2 }, % 6
+    { 'log reg CNN', @logRegCnn2 }, % 7
+    { 'rbf SVM HOG + CNN MC', @svmHogCnnMC2 }, % 8
+    { 'lin SVM CNN', @(x, y, c) linSvmPcaCnnF2(x, y, c, 0.00023, 1300) }, % 9
+    { 'rbf SVM CNN', @(x, y, c) rbfSvmPcaCnnF2(x, y, c, 150, 3.25, 0.00023) } % 10
 };
-error2 = zeros(nbRuns, length(methods2));
 
-ticId = ticStatus('Evaluating binary methods');
-labels2 = [];
+labels2 = cellfun(@(m) m{1}, methods2, 'UniformOutput', 0);
+
+%%
+% error2 = zeros(nbRuns, length(methods2));
 for r = 1:nbRuns
+    fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
+    
     % Split the data
     N = size(data.yTrain, 1);
     splitIdx = floor(N * ratio);
@@ -57,22 +61,23 @@ for r = 1:nbRuns
     % Run the methods
     for m = 1:length(methods2)
         method = methods2{m}{2};
-        labels2 = [labels2 methods2{m}{1}];
+        label = methods2{m}{1};
 
         yPred = method(tr, val.X, category);
         
         % Compute the error
-        error2(r, m) = BER(yPred, val.y);
+        err = BER(yPred, val.y);
+        error2(r, m) = err;
         
+        fprintf([label ' gave BER = ' num2str(err) '\n']);
         pause(0.1); % so that plot can be displayed
     end
-    
-    tocStatus(ticId, r / nbRuns);
 end
 
+%%
 % Plotting BINARY scores
 figure('Name', 'BER BINARY');
-boxplot(error2, 'labels', labels2);
+boxplot(error2, 'labels', labels2');%, 'labelorientation', 'inline');
 title(['category = ' num2str(category)]);
 
 

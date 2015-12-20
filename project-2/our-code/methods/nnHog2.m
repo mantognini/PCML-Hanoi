@@ -8,7 +8,7 @@ function yPred = nnHog2(train, XValid, category)
 
     % SETTINGS:
     INNER_SIZE = 10;
-    EPOCHS     = 15;
+    EPOCHS     = 20;
 
     % Apply NN
     yPred = nn(INNER_SIZE, 2, EPOCHS, 1, double(train.X.hog), train.y, XValid.hog);
