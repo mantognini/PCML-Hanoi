@@ -1,5 +1,5 @@
 %
-% Save final predictions for the binary task
+
 clearvars;
 addpath(genpath('data/'));
 addpath(genpath('our-code/'));
@@ -34,9 +34,6 @@ val.y = data.yTrain(idxValid);
 
 % apply method
 yPred = method(tr, val.X);
-
-% save yTestPred
-%save 'pred_binary.mat' yPred;
 
 %%
 % plotConfusion(val.y, int8(yPred));

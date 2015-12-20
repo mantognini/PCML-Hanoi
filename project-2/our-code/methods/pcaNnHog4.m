@@ -5,7 +5,7 @@ function yPred = pcaNnHog4(train, XValid)
     % SETTINGS:
     M             = 200; % might be lower maybe
     INNER_SIZE    = 10;
-    EPOCHS        = 15;
+    EPOCHS        = 20;
     LEARNING_RATE = 2;   % might be non-optimal
     
     % Apply PCA

@@ -26,7 +26,7 @@ methods2 = {
     { 'RF CNN', @cnnForestF2 }, %2
     { 'NN CNN', @nnCnn2 }, % 6
     { 'log reg CNN', @logRegCnn2 }, % 7
-    { 'rbf SVM HOG + CNN MC', @svmHogCnnMC2 }, % 8
+    { 'rbf SVM MC', @svmHogCnnMC2 }, % 8
     { 'lin SVM CNN', @(x, y, c) linSvmPcaCnnF2(x, y, c, 0.00023, 1300) }, % 9
     { 'rbf SVM CNN', @(x, y, c) rbfSvmPcaCnnF2(x, y, c, 150, 3.25, 0.00023) } % 10
 };
@@ -83,12 +83,17 @@ title(['category = ' num2str(category)]);
 
 %% Evaluating multi-class methods
 methods4 = {
-    @randM4,
-%     @pcaNnHog4,
-%     @pcaNnCnn4,
-%     @rbfSvmPcaCnnManualTree4
+%     { 'NN HOG', @pcaNnHog4 }, % 0.30
+    { 'NN CNN', @pcaNnCnn4 }, % 0.095
+    { 'Best Model Forest', @bestModelsForest4 }, % 0.08
+    { 'SVM Matlab', @svmPcaCnnMatlab4 } % 0.08
+    { 'SVM + Manual Tree', @rbfSvmPcaCnnManualTree4 }, % 0.075
 };
-error4 = zeros(nbRuns, length(methods4));
+
+labels4 = cellfun(@(m) m{1}, methods4, 'UniformOutput', 0);
+
+%%
+% error4 = zeros(nbRuns, length(methods4));
 
 for r = 1:nbRuns
     fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
@@ -115,18 +120,23 @@ for r = 1:nbRuns
 
     % Run the methods
     for m = 1:length(methods4)
-        method = methods4{m};
+        method = methods4{m}{2};
+        label = methods4{m}{1};
 
         yPred = method(tr, val.X);
         
         % Compute the errors
-        error4(r, m) = BER(yPred, val.y);
+        err = BER(yPred, val.y);
+        error4(r, m) = err;
         
+        fprintf([label ' gave BER = ' num2str(err) '\n']);
         pause(0.1); % so that plot can be displayed
     end
 end
 
-% Plotting MULTICLASS scores
+
+%% Plotting MULTICLASS scores
 figure('Name', 'BER MULTICLASS');
-labels4 = cellfun(@func2str, methods4, 'UniformOutput', false);
-boxplot(error4, 'labels', labels4);
+boxplot(error4, 'labels', labels4');
+
+
