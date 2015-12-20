@@ -2,8 +2,9 @@ function yPred = nnHog2(train, XValid, category)
 %
 % Simply apply NN on HOG feature for binary discrimination
 
-    % Make y binary
-    train.y = toBinary(train.y, category);
+    if category ~= 4
+        error('unsupported');
+    end
 
     % SETTINGS:
     INNER_SIZE = 10;
