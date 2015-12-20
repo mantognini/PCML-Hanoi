@@ -38,12 +38,14 @@ yPred = method(tr, val.X);
 %%
 % plotConfusion(val.y, int8(yPred));
 
+figure('Name', 'confusion matrix for binary prediction');
 mat = confusionmat(val.y, int8(yPred));%rand(2);           %# A 5-by-5 matrix of random values from 0 to 1
 imagesc(mat);            %# Create a colored plot of the matrix values
 colormap(flipud(hot));  %# Change the colormap to gray (so higher values are
                          %#   black and lower values are white)
-xlabel('truth');
-ylabel('prediction');
+xlabel('prediction');
+ylabel('truth');
+title('Confusion map for binary prediction');
 
 textStrings = num2str(mat(:),'%.f');  %# Create strings from the matrix values
 textStrings = strtrim(cellstr(textStrings));  %# Remove any space padding
