@@ -8,20 +8,30 @@ clearvars;
 addpath(genpath('data/'));
 addpath(genpath('our-code/'));
 addpath(genpath('toolboxs/'));
-load 'data/data.mat';
+load 'data/fixedData.mat';
+% load 'data/data.mat';
+data = fixedData;
+
+names{1} = 'plane';
+names{2} = 'car';
+names{3} = 'horse';
+names{4} = 'other';
+values.plane = 1;
+values.car = 2;
+values.horse = 3;
+values.other = 4;
 
 
-%%
-% SETTINGS
+%% SETTINGS
 
-ratio1 = 0.7; % from all data -> training1-rest sets ratio
-ratio2 = 0.25; % from rest -> training2-testing sets ratio
+ratio1 = 0.5; % from all data -> training1-rest sets ratio
+ratio2 = 0.5; % from rest -> training2-testing sets ratio
 % in effect, testing set is 30% of all data
 % training1 is used for SVM features extractions
 % training2 is used for training the final model
 % testing is always used for validation (BER on independent data)
 
-M = 200; % PCA for CNN
+M = 150; % PCA for CNN
 
 % For fitcecoc:
 % opts = statset('UseParallel', 1);
@@ -45,41 +55,40 @@ svmRbf = ...
 knn = templateKNN('NumNeighbors', 5, 'Standardize', 1);
 
 
-%%
-% Split the data
+%% Split the data
 
 N1 = size(data.yTrain, 1);
 splitIdx = floor(N1 * ratio1);
 
-idx = randperm(N1);
-idxTrain = idx(1:splitIdx);
-idxValid = idx(splitIdx + 1:end);
+idx1 = randperm(N1);
+idxTrain = idx1(1:splitIdx);
+idxRest = idx1(splitIdx + 1:end);
 
 tr1.X.hog = data.hog.train.X(idxTrain, :);
 tr1.X.cnn = data.cnn.train.X(idxTrain, :);
 tr1.y = data.yTrain(idxTrain); % train y are 4-class
 
-rest.X.hog = data.hog.train.X(idxValid, :);
-rest.X.cnn = data.cnn.train.X(idxValid, :);
-rest.y = data.yTrain(idxValid); % valid y are 4-class
+rest.X.hog = data.hog.train.X(idxRest, :);
+rest.X.cnn = data.cnn.train.X(idxRest, :);
+rest.y = data.yTrain(idxRest); % valid y are 4-class
 
 % split validation into two dataset again
 N2 = size(rest.y, 1);
 splitIdx = floor(N2 * ratio2);
-idx = randperm(N2);
-idxTrain = idx(1:splitIdx);
-idxValid = idx(splitIdx + 1:end);
+idx2 = randperm(N2);
+idxTrain2 = idx2(1:splitIdx);
+idxValid = idx2(splitIdx + 1:end);
 
-tr2.X.hog = rest.X.hog(idxTrain, :);
-tr2.X.cnn = rest.X.cnn(idxTrain, :);
-tr2.y = rest.y(idxTrain); % train y are 4-class
+tr2.X.hog = rest.X.hog(idxTrain2, :);
+tr2.X.cnn = rest.X.cnn(idxTrain2, :);
+tr2.y = rest.y(idxTrain2); % train y are 4-class
 
 val.X.hog = rest.X.hog(idxValid, :);
 val.X.cnn = rest.X.cnn(idxValid, :);
 val.y = rest.y(idxValid); % valid y are 4-class
 
-%%
-% Apply PCA on CNN
+
+%% Apply PCA on CNN
 
 % [TrZ, TeZ] = pcaCnn(M, train, XValid); % can't apply it here...
 fprintf('Extracting data & computing eigenvectors...\n');
@@ -118,8 +127,8 @@ valZ = valX * Um;
 toc
 
 
-%%
-% Display data
+%% Display data
+
 figure;
 subplot(221);
 histogram(tr1.y, 'Normalization', 'probability'); hold on;
@@ -144,8 +153,7 @@ title('category 3');
 
 pause(0.1);
 
-%%
-% SVM MULTICLASS HOG
+%% SVM MULTICLASS HOG
 
 fprintf('SVM MULTICLASS HOG...\n');
 tic
@@ -173,8 +181,7 @@ fprintf(['SVM MULTI HOG BER = ' num2str(berSvmHog4) '\n']);
 % end
 
 
-%%
-% SVM MULTICLASS CNN
+%% SVM MULTICLASS CNN
 
 fprintf('SVM MULTICLASS CNN...\n');
 tic
@@ -202,8 +209,8 @@ fprintf(['SVM MULTI CNN BER = ' num2str(berSvmCnn4) '\n']);
 % end
 
 
-%%
-% SVM 4x BINARY HOG
+%% SVM 4x BINARY HOG
+
 ticId = ticStatus('SVM BINARY HOG');
 trScoreSvmHog2 = [];
 trLabelPredSvmHog2 = [];
@@ -244,8 +251,8 @@ fprintf(['SVM BINARY HOG BER = ' num2str(berSvmHog2) '\n']);
 
 
 
-%%
-% SVM 4x BINARY CNN
+%% SVM 4x BINARY CNN
+
 ticId = ticStatus('SVM BINARY CNN');
 trScoreSvmCnn2 = [];
 trLabelPredSvmCnn2 = [];
@@ -288,8 +295,61 @@ fprintf(['SVM VAL BINARY CNN BER = ' num2str(berValSvmCnn2) '\n']);
 % end
 
 
-%%
-% Trees On HOG
+%% HOMEMADE BINARY SVM
+
+tic
+
+try1 = toBinary(tr1.y, 1);
+try2 = toBinary(tr1.y, 2);
+try3 = toBinary(tr1.y, 3);
+
+genericClassifier = @(X, y, C, gamma) svmF(Tr1Z, y, X, @rbfKernel, C, gamma);
+
+% C and gamma where empirically found
+trScoreHomeMadeSvmCnn2 = zeros(size(Tr2Z, 1), 3);
+trScoreHomeMadeSvmCnn2(:, 1) = genericClassifier(Tr2Z, try1, 7, 0.0003);
+trScoreHomeMadeSvmCnn2(:, 2) = genericClassifier(Tr2Z, try2, 1, 3.5e-4);
+trScoreHomeMadeSvmCnn2(:, 3) = genericClassifier(Tr2Z, try3, 10, 1e-4);
+
+valScoreHomeMadeSvmCnn2 = zeros(size(valZ, 1), 3);
+valScoreHomeMadeSvmCnn2(:, 1) = genericClassifier(valZ, try1, 7, 0.0003);
+valScoreHomeMadeSvmCnn2(:, 2) = genericClassifier(valZ, try2, 1, 3.5e-4);
+valScoreHomeMadeSvmCnn2(:, 3) = genericClassifier(valZ, try3, 10, 1e-4);
+
+% trainingData = [double(tr2.y) trScoreHomeMadeSvmCnn2];
+
+toc
+
+% idx1 = tr2.y == 1;
+% idx2 = tr2.y == 2;
+% idx3 = tr2.y == 3;
+% idx4 = tr2.y == 4;
+% 
+% figure;
+% plot3(trScoreHomeMadeSvmCnn2(idx1, 1), ...
+%       trScoreHomeMadeSvmCnn2(idx1, 2), ...
+%       trScoreHomeMadeSvmCnn2(idx1, 3), ...
+%       '.', 'MarkerSize', 30);
+% hold on;
+% plot3(trScoreHomeMadeSvmCnn2(idx2, 1), ...
+%       trScoreHomeMadeSvmCnn2(idx2, 2), ...
+%       trScoreHomeMadeSvmCnn2(idx2, 3), ...
+%       '.', 'MarkerSize', 30);
+% plot3(trScoreHomeMadeSvmCnn2(idx3, 1), ...
+%       trScoreHomeMadeSvmCnn2(idx3, 2), ...
+%       trScoreHomeMadeSvmCnn2(idx3, 3), ...
+%       '.', 'MarkerSize', 30);
+% plot3(trScoreHomeMadeSvmCnn2(idx4, 1), ...
+%       trScoreHomeMadeSvmCnn2(idx4, 2), ...
+%       trScoreHomeMadeSvmCnn2(idx4, 3), ...
+%       '.', 'MarkerSize', 30);
+% legend('class 1', 'class 2', 'class 3', 'class 4');
+% xlabel('pred 1');
+% ylabel('pred 2');
+% zlabel('pred 3');
+% grid on;
+
+%% Trees On HOG
 
 tic
 
@@ -307,8 +367,7 @@ toc
 fprintf(['TREE HOG BER = ' num2str(berTreeHog) '\n']);
 
 
-%%
-% Trees On CNN
+%% Trees On CNN
 
 tic
 
@@ -325,8 +384,8 @@ berTreeCnn = BER(tr2.y, trLabelPredTreeCnn4);
 toc
 fprintf(['TREE CNN BER = ' num2str(berTreeCnn) '\n']);
 
-%%
-% Random forest on HOG
+
+%% Random forest on HOG
 
 forestOpts.M = 20; % # trees to train
 forest = forestTrain(tr1.X.hog, tr1.y, forestOpts);
@@ -337,8 +396,8 @@ forest = forestTrain(tr1.X.hog, tr1.y, forestOpts);
 berForestHog = BER(tr2.y, trLabelPredForestHog4);
 fprintf(['FOREST HOG BER = ' num2str(berForestHog) '\n']);
 
-%%
-% Random forest on CNN
+
+%% Random forest on CNN
 
 forestOpts.M = 10; % # trees to train
 forest = forestTrain(Tr1Z, tr1.y, forestOpts);
@@ -349,26 +408,24 @@ forest = forestTrain(Tr1Z, tr1.y, forestOpts);
 berForestCnn = BER(tr2.y, trLabelPredForestCnn4);
 fprintf(['FOREST CNN BER = ' num2str(berForestCnn) '\n']);
 
-%%
-% Combine stuff together
 
-% trScores  = [trScoreSvmHog2,  trScoreSvmHog4,  trScoreSvmCnn2,  trScoreSvmCnn4,  trScoreTreeHog4,  trScoreTreeCnn4,  trLabelPredForestHog4,  trLabelPredForestCnn4];
-% valScores = [valScoreSvmHog2, valScoreSvmHog4, valScoreSvmCnn2, valScoreSvmCnn4, valScoreTreeHog4, valScoreTreeCnn4, valLabelPredForestHog4, valLabelPredForestCnn4];
-trScores  = [trScoreSvmCnn2];
-valScores = [valScoreSvmCnn2];
+%% Combine stuff together
+
+% trScores  = [trScoreSvmHog2,  trScoreSvmHog4,  trScoreSvmCnn2,  trScoreSvmCnn4,  trScoreHomeMadeSvmCnn2,  trScoreTreeHog4,  trScoreTreeCnn4,  trLabelPredForestHog4,  trLabelPredForestCnn4];
+% valScores = [valScoreSvmHog2, valScoreSvmHog4, valScoreSvmCnn2, valScoreSvmCnn4, valScoreHomeMadeSvmCnn2, valScoreTreeHog4, valScoreTreeCnn4, valLabelPredForestHog4, valLabelPredForestCnn4];
+trScores  = [trScoreHomeMadeSvmCnn2];
+valScores = [valScoreHomeMadeSvmCnn2];
 
 
-%%
-% Apply NN
+%% Apply NN
 
-yPredNn = nn(40, 0.1, 50, 0, trScores, tr2.y, valScores);
+yPredNn = nn(200, 0.05, 500, 0, trScores, tr2.y, valScores);
 berNn = BER(val.y, yPredNn);
 fprintf(['NN on extracted features: BER = ' num2str(berNn) '\n']);
 % Apparently equivalent as using CNN directly...
 
 
-%%
-% Apply decision tree
+%% Apply decision tree
 
 t = templateTree('Surrogate','on');
 model = fitcecoc(trScores, tr2.y, 'Learners', t, 'Options', opts);
@@ -377,8 +434,7 @@ berTree = BER(val.y, yPredTree);
 fprintf(['Tree on extracted features: BER = ' num2str(berTree) '\n']);
 
 
-%%
-% Apply another kind of decision tree
+%% Apply another kind of decision tree
 
 t = templateTree('Surrogate','on');
 model = fitensemble(trScores, tr2.y, 'AdaBoostM2', 100, t);
@@ -387,8 +443,7 @@ berTreeBis = BER(val.y, yPredTreeBis);
 fprintf(['Tree (bis) on extracted features: BER = ' num2str(berTreeBis) '\n']);
 
 
-%%
-% Apply KNN
+%% Apply KNN
 
 t = templateKNN('NumNeighbors',5,'Standardize',1);
 model = fitensemble(trScores, tr2.y, 'Subspace', 100, t);
@@ -397,8 +452,7 @@ berKnn = BER(val.y, yPredKnn);
 fprintf(['KNN on extracted features: BER = ' num2str(berKnn) '\n']);
 
 
-%%
-% Apply Bagging
+%% Apply Bagging
 
 t = templateTree('Surrogate','on');
 model = fitensemble(trScores, tr2.y, 'Bag', 100, t, 'Type', 'Classification');
@@ -406,8 +460,7 @@ model = fitensemble(trScores, tr2.y, 'Bag', 100, t, 'Type', 'Classification');
 berBag = BER(val.y, yPredBag);
 fprintf(['Bagging on extracted features: BER = ' num2str(berBag) '\n']);
 
-%%
-% More trees
+%% More trees
 
 % leafs = logspace(1,2,20);
 % LEAFS = numel(leafs);
@@ -426,8 +479,8 @@ berCtree = BER(val.y, yPredCtree);
 fprintf(['CTree on extracted features: BER = ' num2str(berCtree) '\n']);
 % view(model,'mode','graph');
 
-%%
-% Piotr' random forest
+
+%% Piotr' random forest
 
 forestOpts.M = 30; % # trees to train
 forest = forestTrain(trScores, tr2.y, forestOpts);
@@ -444,5 +497,39 @@ histogram(yPredNn, 'Normalization', 'probability'); hold off;
 subplot(122);
 imagesc(val.y ~= yPredNn);
 title(['FINAL BER = ' num2str(berNn)]);
+
+
+%%
+
+restLabels = rest.y;
+restLabels(idxValid) = yPredNn; % override with our prediction
+allLabels = data.yTrain;
+allLabels(idxRest) = restLabels; % override with our prediction
+
+idxMissclassified = find(allLabels ~= data.yTrain);
+fprintf(['# miss classified = ' num2str(length(idxMissclassified)) '\n']);
+
+for cat = 1:4
+    idxCat = find(data.yTrain == cat);
+    idxMissclassifiedCat = intersect(idxCat, idxMissclassified);
+    
+    fprintf(['# miss classified cat ' names{cat} ' = ' num2str(length(idxMissclassifiedCat)) '\n']);
+    
+    figure('Name', ['Category ' names{cat}]);
+    
+    subplotIdx = 1;
+    suplotSize = ceil(sqrt(length(idxMissclassifiedCat)));
+    
+    for j = 1:length(idxMissclassifiedCat)
+        i = idxMissclassifiedCat(j);
+        
+        subplot(suplotSize, suplotSize, subplotIdx);
+        img = imread( sprintf('train/imgs/train%05d.jpg', i) );
+        imshow(img);
+        title([num2str(i) '-th, p=' names{allLabels(i)}]);
+        
+        subplotIdx = subplotIdx + 1;
+    end
+end
 
 
