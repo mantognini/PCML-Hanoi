@@ -125,6 +125,7 @@ okay = okays(1);
 figure('Name', 'Distortion Measure');
 plot(rm, 'LineWidth', 4); hold on;
 plot(okay, rm(okay), 'black-diamond', 'MarkerSize', 10, 'MarkerFaceColor', 'k');
+text(okay+100, rm(okay)+0.03, ['10% \rightarrow M \geq ' num2str(okay)]);
 xlabel('M');
 ylabel('energy loss (%)');
 title('Energy loss for CNN');
