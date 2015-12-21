@@ -18,5 +18,5 @@ data.cnn.sigma = sigmaCnn;
 data.hog.sigma = sigmaHog;
 
 % save to file
-save 'data.mat' data;
+save 'data/data.mat' data;
 

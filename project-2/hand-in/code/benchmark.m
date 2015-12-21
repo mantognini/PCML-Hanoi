@@ -9,6 +9,7 @@ clearvars;
 addpath(genpath('data/'));
 addpath(genpath('our-code/'));
 addpath(genpath('toolboxs/'));
+normTraining();
 load 'data/data.mat';
 
 %% settings
@@ -34,7 +35,7 @@ methods2 = {
 labels2 = cellfun(@(m) m{1}, methods2, 'UniformOutput', 0);
 
 %%
-% error2 = zeros(nbRuns, length(methods2));
+error2 = zeros(nbRuns, length(methods2));
 for r = 1:nbRuns
     fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
     
@@ -93,7 +94,7 @@ methods4 = {
 labels4 = cellfun(@(m) m{1}, methods4, 'UniformOutput', 0);
 
 %%
-% error4 = zeros(nbRuns, length(methods4));
+error4 = zeros(nbRuns, length(methods4));
 
 for r = 1:nbRuns
     fprintf(['run ' num2str(r) '/' num2str(nbRuns) '\n']);
