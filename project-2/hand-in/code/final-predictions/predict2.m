@@ -2,6 +2,9 @@
 % Save final predictions for the binary task
 clearvars;
 addpath(genpath('data/'));
+addpath(genpath('toolboxs/'));
+addpath(genpath('our-code/'));
+normTraining();
 load 'data/data.mat';
 load 'data/test.mat';
 
