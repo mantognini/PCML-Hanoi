@@ -17,27 +17,13 @@ te.cnn = normalize(test.X_cnn, tr.cnn.mu, tr.cnn.sigma);
 te.hog = normalize(test.X_hog, tr.hog.mu, tr.hog.sigma);
 
 % define method
-method = @(train, XValid) rbfSvmPcaCnnManualTree4(train, XValid, -0.7);
+% C* = 3.25, M* = 150, gamma = 0.00023
+method = @(tr, XValid) rbfSvmPcaCnnF2(tr, XValid, 4, 150, 3.25, 0.00023);
 
 % apply method
 Ytest = method(tr, te);
 
 % save yTestPred
-save 'pred_multiclass.mat' Ytest;
+save 'pred_binary.mat' Ytest;
 
 fprintf('done\n');
-
-%%
-
-names{1} = 'plane';
-names{2} = 'car';
-names{3} = 'horse';
-names{4} = 'other';
-
-labels = categorical(Ytest, 1:4, names);
-
-figure;
-histogram(labels, 'Normalization', 'probability');
-
-
-

@@ -85,9 +85,10 @@ title(['category = ' num2str(category)]);
 methods4 = {
 %     { 'NN HOG', @pcaNnHog4 }, % 0.30
     { 'NN CNN', @pcaNnCnn4 }, % 0.095
-    { 'Best Model Forest', @bestModelsForest4 }, % 0.08
-    { 'SVM Matlab', @svmPcaCnnMatlab4 } % 0.08
-    { 'SVM + Manual Tree', @rbfSvmPcaCnnManualTree4 }, % 0.075
+%     { 'Best Model Forest', @bestModelsForest4 }, % 0.08
+    { 'SVM Matlab', @svmPcaCnnMatlab4 } % 0.085
+    { 'SVM + Manual Tree', @(train, XValid) rbfSvmPcaCnnManualTree4(train, XValid, -1) }, % 0.078
+    { 'SVM + Manual Tree 2', @(train, XValid) rbfSvmPcaCnnManualTree4(train, XValid, -0.7) }, % 0.072
 };
 
 labels4 = cellfun(@(m) m{1}, methods4, 'UniformOutput', 0);
@@ -138,5 +139,8 @@ end
 %% Plotting MULTICLASS scores
 figure('Name', 'BER MULTICLASS');
 boxplot(error4, 'labels', labels4');
+ylabel('BER');
+title('Method performance for multiclass models');
 
+mean(error4)
 

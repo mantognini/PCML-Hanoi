@@ -1,4 +1,4 @@
-function yPred = rbfSvmPcaCnnManualTree4(train, XValid)
+function yPred = rbfSvmPcaCnnManualTree4(train, XValid, threshold)
 %
 % Apply SVM for binary prediction for detecting
 %  - {1} or {2, 3, 4}
@@ -22,8 +22,8 @@ function yPred = rbfSvmPcaCnnManualTree4(train, XValid)
     
     % Apply manual tree
     yPred = ones(size(XValid.cnn, 1), 1) * 4; % default: 4
-    yPred(yScore3 <= -1) = 3;
-    yPred(yScore1 <= -1) = 1;
-    yPred(yScore2 <= -1) = 2;
+    yPred(yScore3 <= threshold) = 3;
+    yPred(yScore1 <= threshold) = 1; 
+    yPred(yScore2 <= threshold) = 2;
     
 end

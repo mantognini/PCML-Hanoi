@@ -9,7 +9,7 @@ load 'data/data.mat';
 ratio = 0.7;
 
 % define method
-method = @rbfSvmPcaCnnManualTree4;
+method = @(train, XValid) rbfSvmPcaCnnManualTree4(train, XValid, -1);
 
 
 % Split the data
@@ -43,8 +43,8 @@ mat = confusionmat(val.y, int8(yPred));%rand(2);           %# A 5-by-5 matrix of
 imagesc(mat);            %# Create a colored plot of the matrix values
 colormap(flipud(hot));  %# Change the colormap to gray (so higher values are
                          %#   black and lower values are white)
-xlabel('prediction');
-ylabel('truth');
+xlabel('Prediction');
+ylabel('Truth');
 title('Confusion map for binary prediction');
 
 textStrings = num2str(mat(:),'%.f');  %# Create strings from the matrix values
