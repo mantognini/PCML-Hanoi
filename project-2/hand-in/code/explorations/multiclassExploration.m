@@ -8,9 +8,7 @@ clearvars;
 addpath(genpath('data/'));
 addpath(genpath('our-code/'));
 addpath(genpath('toolboxs/'));
-load 'data/fixedData.mat';
-% load 'data/data.mat';
-data = fixedData;
+load 'data/data.mat';
 
 names{1} = 'plane';
 names{2} = 'car';
