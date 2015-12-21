@@ -13,7 +13,7 @@ for i = 1:6
 
     test.X_cnn = [test.X_cnn; train.X_cnn(idx, :)];
     test.X_hog = [test.X_hog; train.X_hog(idx, :)];
-    y = [y train.y(idx, :)];
+    y = [y; train.y(idx, :)];
 end
 
 % Save
