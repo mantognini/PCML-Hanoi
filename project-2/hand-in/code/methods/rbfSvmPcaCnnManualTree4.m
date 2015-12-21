@@ -21,9 +21,10 @@ function yPred = rbfSvmPcaCnnManualTree4(train, XValid)
     yScore3 = genericClassifier(try3, 10, 1e-4);
     
     % Apply manual tree
+    thres = -0.7;
     yPred = ones(size(XValid.cnn, 1), 1) * 4; % default: 4
-    yPred(yScore3 <= -1) = 3;
-    yPred(yScore1 <= -1) = 1;
-    yPred(yScore2 <= -1) = 2;
+    yPred(yScore3 < thres) = 3;
+    yPred(yScore1 < thres) = 1;
+    yPred(yScore2 < thres) = 2;
     
 end
