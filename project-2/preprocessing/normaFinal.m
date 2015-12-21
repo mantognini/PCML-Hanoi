@@ -10,10 +10,10 @@ load 'data/train/train.mat';
 [X2, ~, ~] = zscore([test.X_hog; train.X_hog]);
 
 test.X_cnn = X1(1:size(test.X_cnn, 1), :);
-train.X_cnn = X1(size(train.X_cnn, 1)+1:end, :);
+train.X_cnn = X1(size(test.X_cnn, 1)+1:end, :);
 
 test.X_hog = X2(1:size(test.X_hog, 1), :);
-train.X_hog = X2(size(train.X_hog, 1)+1:end, :);
+train.X_hog = X2(size(test.X_hog, 1)+1:end, :);
 
 % Free space
 clear X1;
@@ -25,8 +25,8 @@ data.tr.X.cnn = train.X_cnn;
 data.tr.y = train.y;
 
 % testing data
-data.te.X.hog = test.X_hog;
-data.te.X.cnn = test.X_cnn;
+data.te.hog = test.X_hog;
+data.te.cnn = test.X_cnn;
 
 save 'finalData.mat' data -v7.3;
 

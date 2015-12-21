@@ -2,28 +2,30 @@
 % Save final predictions for the binary task
 clearvars;
 addpath(genpath('data/'));
-load 'data/data.mat';
+load 'data/finalData.mat';
 
 % define method
-method = @randM4;
-
-% define training data
-tr.X.hog = data.hog.train.X;
-tr.X.cnn = data.cnn.train.X;
-tr.cnn.mu = data.cnn.mu;
-tr.hog.mu = data.hog.mu;
-tr.cnn.sigma = data.cnn.sigma;
-tr.hog.sigma = data.hog.sigma;
-tr.y = data.yTrain; % train y are 4-class
-
-% todo replace with testing data
-tmpIdx = 1:1:1000;
-teX.hog = data.hog.train.X(tmpIdx, :);
-teX.cnn = data.cnn.train.X(tmpIdx, :);
+method = @rbfSvmPcaCnnManualTree4;
 
 % apply method
-yPred = method(tr, teX);
+Ytest = method(data.tr, data.te);
 
 % save yTestPred
-save 'pred_multiclass.mat' yPred;
+save 'pred_multiclass.mat' Ytest;
+
+fprintf('done\n');
+
+%%
+
+names{1} = 'plane';
+names{2} = 'car';
+names{3} = 'horse';
+names{4} = 'other';
+
+labels = categorical(Ytest, 1:4, names);
+
+figure;
+histogram(labels, 'Normalization', 'probability');
+
+
 
