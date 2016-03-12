@@ -1,17 +1,5 @@
-# Project 2
+# Pattern Classification and Machine Learning
 
-Plan
-=============
-1. understand code
-  1. HOG
-  1. CNN
-1. explore data
-  1. PCA
-1. baseline
-  1. Penalize Logistic Regression
-  1. SVM
-1. advanced methods
-  1. Penalize Regression based on Multinomial Distribution
-  1. Boosting (e.g. Adaboost toolbox), decision Tree
-  1. Explore Kernels
-  1. Layered Neural Newtork
+Repository for project 1 & 2 for the PCML 2015 class at EPFL.
+
+Group Ha-Noi -- Frédéric Ouwehand & Marco Antognini
